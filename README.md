@@ -23,6 +23,7 @@ https://www.figma.com/design/odPHiAiPAjBDYgzhdSWHth/Шаблон-рабочег�
 
 - **Язык:** Swift 🍏
 - **Хранение данных:** SwiftData
+- **Основной фреймворк для верстки:** SwiftUI
 
 _To be updated..._
 
