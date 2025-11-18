@@ -10,6 +10,7 @@ import Combine
 
 final class TodayTasksViewModel: ObservableObject {
     @Published private(set) var todayTasks: [Task] = []
+    @Published var doneTasks: [Task] = []
     
     private var allTasks: [Task] = [] {
         didSet {
@@ -24,6 +25,8 @@ final class TodayTasksViewModel: ObservableObject {
             Task(title:"Eat"),
             Task(title:"Sleep")
         ]
+        
+        filterTodayTasks()
     }
     
     func toggleCompletion(for task:Task) {

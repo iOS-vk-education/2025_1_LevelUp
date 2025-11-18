@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-// each element must have id
 struct Task: Identifiable {
     let id: UUID = UUID()
     var title: String
