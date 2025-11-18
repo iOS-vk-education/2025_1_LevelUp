@@ -26,7 +26,7 @@ struct RegisterView: View {
                 ]),
                 startPoint: .top,
                 endPoint: .bottom
-            )
+            ) 
             .ignoresSafeArea()
             
             ScrollView {

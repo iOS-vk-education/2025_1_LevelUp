@@ -55,7 +55,7 @@ struct AuthView: View {
             }
             .sheet(isPresented: $showingRegister) {
                 RegisterView()
-            }
+            } 
         }
     }
 }

@@ -102,7 +102,7 @@ struct LoginView: View {
         }
         .navigationBarBackButtonHidden(false)
     }
-}
+} 
 
 #Preview {
     NavigationStack {
