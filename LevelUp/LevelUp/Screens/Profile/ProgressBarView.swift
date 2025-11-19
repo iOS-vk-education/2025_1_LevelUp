@@ -18,7 +18,9 @@ struct ProgressBarView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
             icon
-                .frame(width: 18, height: 18)
+                .frame(
+                    width: ProfileViewSizes.barIconSize.rawValue,
+                    height: ProfileViewSizes.barIconSize.rawValue)
 
             VStack(spacing: 4) {
                 GeometryReader { geo in

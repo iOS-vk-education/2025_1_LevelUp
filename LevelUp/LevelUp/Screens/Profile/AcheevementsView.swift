@@ -81,7 +81,9 @@ struct AcheevementsView: View {
             HStack {
                 Button("", systemImage: "chevron.backward") {
                 }
-                .frame(width: 44, height: 44)
+                .frame(
+                    width: AcheevementsViewSizes.backBtn.rawValue,
+                    height: AcheevementsViewSizes.backBtn.rawValue)
                 .foregroundColor(.black)
                 Spacer()
             }

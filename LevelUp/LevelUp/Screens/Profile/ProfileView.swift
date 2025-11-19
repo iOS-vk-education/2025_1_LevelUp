@@ -17,7 +17,9 @@ struct ProfileView: View {
                     VStack {
                         Image("Profile")
                             .resizable()
-                            .frame(width: 100, height: 100)
+                            .frame(
+                                width: ProfileViewSizes.iconSize.rawValue,
+                                height: ProfileViewSizes.iconSize.rawValue)
                             .clipShape(Circle())
                         
                         HStack {
@@ -64,7 +66,9 @@ struct ProfileView: View {
                 
                 HStack {
                     Image("cup")
-                        .frame(width: 52, height: 52)
+                        .frame(
+                            width: ProfileViewSizes.cupSize.rawValue,
+                            height: ProfileViewSizes.cupSize.rawValue)
                     Text("12")
                         .font(.system(size: 32))
                     Spacer()
@@ -80,7 +84,7 @@ struct ProfileView: View {
                     .font(.system(size: 20))
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
-                    .frame(maxWidth: 245)
+                    .frame(maxWidth: ProfileViewSizes.statisticsMaxWidth.rawValue)
                 WeekXPView(color: .green)
                 
                 
@@ -88,7 +92,7 @@ struct ProfileView: View {
                     .font(.system(size: 20))
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
-                    .frame(width: 245)
+                    .frame(width: ProfileViewSizes.statisticsMaxWidth.rawValue)
                 
                 WeekXPView(color: .yellow)
                 
@@ -96,7 +100,7 @@ struct ProfileView: View {
                     .font(.system(size: 20))
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
-                    .frame(width: 245)
+                    .frame(width: ProfileViewSizes.statisticsMaxWidth.rawValue)
                 
                 WeekXPView(color: .brown)
             }

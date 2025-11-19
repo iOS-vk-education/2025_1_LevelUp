@@ -12,7 +12,7 @@ struct WeekXPView: View {
     let xps = [30, 15, 20, 5, 25, 23, 26]
     
     var body: some View {
-        let maxColumnHeight = 120;
+        let maxColumnHeight = ProfileViewSizes.statisticsMaxHeight.rawValue;
         let maxXP = xps.max()!;
         
         VStack(spacing: 0) {
