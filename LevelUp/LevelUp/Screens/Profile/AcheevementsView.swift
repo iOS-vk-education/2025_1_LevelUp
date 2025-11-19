@@ -74,9 +74,9 @@ let hardwork = Acheevement(
 let acheevements = [levelUp, hardwork]
 
 
-public struct AcheevementsView: View {
+struct AcheevementsView: View {
     
-    public var body: some View {
+    var body: some View {
         VStack {
             HStack {
                 Button("", systemImage: "chevron.backward") {
@@ -93,21 +93,15 @@ public struct AcheevementsView: View {
             .padding(.horizontal, 26)
             
             VStack(spacing: 15) {
-                ZStack {
-                    AcheevementBackgroundView(height: 180)
-                    Text("Выполняйте достижения и получайте ОП за их выполнение!\n\nВыполнено 4 из 120 достижений.")
-                        .font(.system(size: 20))
-                        .padding(.horizontal, 20)
-                        .frame(width: 320)
-                }
-                
-                
+                Text("Выполняйте достижения и получайте ОП за их выполнение!\n\nВыполнено 4 из 120 достижений.")
+                    .font(.system(size: 20))
+
                 ForEach(Array(acheevements.enumerated()), id: \.offset) { idx, ach in
                     
                     let currentStep = ach.steps[min(ach.completed, ach.steps.count - 1)]
                     
                     ZStack {
-                        AcheevementBackgroundView(height: 100)
+                        AcheevementBackgroundView()
                         HStack {
                             StarsView(completed: ach.completed, total: ach.steps.count)
                             Spacer()
@@ -118,11 +112,9 @@ public struct AcheevementsView: View {
                             }
                         }
                         .padding(.horizontal, 20)
-                        .frame(width: 320)
                     }
                 }
             }
-            .foregroundColor(.white)
         }
         Spacer()
     }

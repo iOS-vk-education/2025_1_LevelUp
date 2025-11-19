@@ -11,92 +11,109 @@ struct ProfileView: View {
     let name = "Луффи"
     
     var body: some View {
-        VStack {
-            HStack {
-                Image("Profile")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-                
-                Spacer()
-                
-                VStack(spacing: 2) {
-                    ProgressBarView(
-                        current: 40,
-                        maximum: 100,
-                        icon: Image("energy"),
-                        color: .yellow,
-                        description: "Энергия"
-                    )
-                    ProgressBarView(
-                        current: 40,
-                        maximum: 100,
-                        icon: Image("physicalEnergy"),
-                        color: .brown,
-                        description: "Физическа энергия",
-                    )
-                    ProgressBarView(
-                        current: 40,
-                        maximum: 100,
-                        icon: Image("expirience"),
-                        color: .green,
-                        description: "Опыт"
-                    )
-                }
-            }
-            .padding(.horizontal, 54)
-            
-            HStack {
-                Text(name)
-                    .font(.custom("Profile", size: 20))
-                Image(systemName: "square.and.pencil")
-                    .font(.custom("Profile", size: 20))
-                Spacer()
-            }
-            .padding(.horizontal, 60)
-            
-            HStack {
-                InfoNumberView(number: "11", description: "Level", background: Image("level"), fontColor: .white)
-                Spacer()
-                InfoNumberView(number: "7", description: "Дней подряд", background: Image("dayStrike"), fontColor: .indigo)
-            }
-            .padding(.horizontal, 68)
-
-            ZStack {
-                AcheevementBackgroundView(height: 87)
+        ScrollView {
+            VStack(spacing: 16) {
                 HStack {
-                    Text("12").font(.system(size: 20, weight: .semibold))
+                    VStack {
+                        Image("Profile")
+                            .resizable()
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                        
+                        HStack {
+                            HStack(spacing: 4) {
+                                Text("11")
+                                Image(systemName: "wind.snow")
+                                    .foregroundStyle(.blue, .yellow.opacity(0.4))
+                            }
+                            HStack(spacing: 4) {
+                                Text("7")
+                                Image(systemName: "flame.fill")
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                    }
+                    
+                    VStack(spacing: 11) {
+                        ProgressBarView(
+                            current: 40,
+                            maximum: 100,
+                            icon: Image("energy"),
+                            mainColor: .yellow,
+                            secondaryColor: .yellow.opacity(0.3),
+                            description: "Энергия"
+                        )
+                        ProgressBarView(
+                            current: 40,
+                            maximum: 100,
+                            icon: Image("physicalEnergy"),
+                            mainColor: .brown,
+                            secondaryColor: .brown.opacity(0.3),
+                            description: "Физическа энергия",
+                        )
+                        ProgressBarView(
+                            current: 40,
+                            maximum: 100,
+                            icon: Image("expirience"),
+                            mainColor: .green,
+                            secondaryColor: .green.opacity(0.3),
+                            description: "Опыт"
+                        )
+                    }
+                }
+                
+                HStack {
                     Image("cup")
                         .frame(width: 52, height: 52)
+                    Text("12")
+                        .font(.system(size: 32))
                     Spacer()
-                    Text("Достижения").font(Font.system(size: 20, weight: .semibold))
+                    Text("Достижения")
+                        .font(.system(size: 20))
                 }
-                .foregroundColor(.white)
-                .padding(.horizontal, 23)
-                .frame(width: 320)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AcheevementBackgroundView())
+                
+                Text("Набранный опыт за последнюю неделю")
+                    .font(.system(size: 20))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 245)
+                WeekXPView(color: .green)
+                
+                
+                Text("Потрачено энергии за последнюю неделю")
+                    .font(.system(size: 20))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 245)
+                
+                WeekXPView(color: .yellow)
+                
+                Text("Потрачено физической энергии за последнюю неделю")
+                    .font(.system(size: 20))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 245)
+                
+                WeekXPView(color: .brown)
             }
-            
-            Text("Активность за последнюю неделю")
-                .frame(width: 245)
-                .multilineTextAlignment(.center)
-                .font(.system(size: 20))
-                .padding(.top, 20)
-            
-            WeekXPView()
-                .padding(.top, 42)
-            
-            Spacer()
-            
-            TabView {
-                Tab("Задачи", systemImage: "target") {
-                    
-                }
-                Tab("Профиль", systemImage: "person.crop.circle") {
-                    ProfileView()
-                }
-            }
-            .frame(height: 50)
+            .padding(.horizontal, 16)
         }
+
+        Spacer()
+        
+        TabView {
+            Tab("Задачи", systemImage: "target") {
+                
+            }
+            Tab("Профиль", systemImage: "person.crop.circle") {
+                ProfileView()
+            }
+        }
+        .frame(height: 50)
     }
 }
 

@@ -7,22 +7,25 @@
 
 import SwiftUI
 
+// todo: customize height for acheevement
 struct AcheevementBackgroundView: View {
-    let height: CGFloat
-    
     var body: some View {
         Image("acheevementBackground")
             .resizable()
-            .scaledToFill()
-            .frame(width: 320, height: height)
-            .clipped()
-            .cornerRadius(10)
+            .aspectRatio(contentMode: .fit)
+            .padding(-40)  // drop shadow
+            
     }
 }
 
 #Preview {
+    Text("Hello, World!")
+        .background(AcheevementBackgroundView())
+        .padding()
+
     ZStack {
-        AcheevementBackgroundView(height: 100)
-        Text("Hello, World!")
+        AcheevementBackgroundView()
+        Text("Hello, World 2!")
     }
+    .padding()
 }

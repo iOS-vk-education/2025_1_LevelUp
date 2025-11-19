@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct WeekXPView: View {
+    let color: Color
     let xps = [30, 15, 20, 5, 25, 23, 26]
     
     var body: some View {
@@ -15,36 +16,36 @@ struct WeekXPView: View {
         let maxXP = xps.max()!;
         
         VStack(spacing: 0) {
-            HStack(alignment: .bottom, spacing: 21) {
+            HStack(alignment: .bottom, spacing: 5) {
                 ForEach(Array(xps.enumerated()), id: \.offset) {id, xp in
                     let height: CGFloat = maxXP > 0 ? (CGFloat(xp) / CGFloat(maxXP)) * CGFloat(maxColumnHeight) : 0
                     
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.green)
-                        .frame(width: 12, height: height)
-                        .overlay(alignment: .top) {
-                            Text("\(xp) XP")
-                                .font(.system(size: 10))
-                                .foregroundColor(.green)
-                                .fixedSize()
-                                .offset(y: -18)
-                        }
-                        .overlay(alignment: .bottom) {
-                            Text("\(24 + id) Авг")
-                                .font(.system(size: 10))
-                                .foregroundColor(.black)
-                                .fixedSize()
-                                .offset(y: id % 2 == 0 ? 20 : 34)
-                        }
+                    VStack {
+                        Text("\(xp) XP")
+                            .foregroundColor(color)
+                            .shadow(color: .black, radius: 0.15, x: 0, y: 0)
+                            .font(.system(size: 10))
+
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(color)
+                            .frame(width: 12, height: height)
+
+                        Text("\(24 + id) Авг")
+                            .font(.system(size: 10))
+                            .foregroundColor(.black)
+                    }
+                    .frame(width: 40)
                 }
             }
             RoundedRectangle(cornerRadius: 1)
                 .fill(.black)
-                .frame(width: 270, height: 4)
+                .frame(height: 4)
+                .offset(y: -16)
+                .padding(.horizontal, 24)
         }
     }
 }
 
 #Preview {
-    WeekXPView()
+    WeekXPView(color: .brown)
 }
