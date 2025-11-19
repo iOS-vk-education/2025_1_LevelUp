@@ -42,12 +42,10 @@ struct ProgressBarView: View {
                 
                 HStack {
                     Text("\(current) / \(maximum)")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                        .hiddenText()
                     Spacer()
                     Text(description)
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                        .hiddenText()
                 }
             }
         }

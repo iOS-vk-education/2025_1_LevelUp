@@ -89,14 +89,14 @@ struct AcheevementsView: View {
             }
             .overlay(
                 Text("Достижения")
-                    .font(.system(size: 20))
+                    .bodyText()
                     .frame(alignment: .center)
             )
             .padding(.horizontal, 26)
             
             VStack(spacing: 15) {
                 Text("Выполняйте достижения и получайте ОП за их выполнение!\n\nВыполнено 4 из 120 достижений.")
-                    .font(.system(size: 20))
+                    .bodyText()
 
                 ForEach(Array(acheevements.enumerated()), id: \.offset) { idx, ach in
                     
@@ -109,7 +109,7 @@ struct AcheevementsView: View {
                             Spacer()
                             VStack(alignment: .leading) {
                                 Text(currentStep.title)
-                                    .font(.system(size: 20, weight: .semibold))
+                                    .titleText()
                                 Text(currentStep.description)
                             }
                         }

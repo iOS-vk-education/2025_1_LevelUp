@@ -73,15 +73,15 @@ struct ProfileView: View {
                         .font(.system(size: 32))
                     Spacer()
                     Text("Достижения")
-                        .font(.system(size: 20))
+                        .titleText()
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(AcheevementBackgroundView())
                 
                 Text("Набранный опыт за последнюю неделю")
-                    .font(.system(size: 20))
+                    .bodyText()
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: ProfileViewSizes.statisticsMaxWidth.rawValue)
@@ -89,7 +89,7 @@ struct ProfileView: View {
                 
                 
                 Text("Потрачено энергии за последнюю неделю")
-                    .font(.system(size: 20))
+                    .bodyText()
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
                     .frame(width: ProfileViewSizes.statisticsMaxWidth.rawValue)
@@ -97,7 +97,7 @@ struct ProfileView: View {
                 WeekXPView(color: .yellow)
                 
                 Text("Потрачено физической энергии за последнюю неделю")
-                    .font(.system(size: 20))
+                    .bodyText()
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
                     .frame(width: ProfileViewSizes.statisticsMaxWidth.rawValue)
