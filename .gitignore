@@ -1,1 +1,29 @@
+# Operating System files
+.DS_Store
+Thumbs.db
 
+# Editor/IDE files
+.idea/
+.vscode/
+*.swp
+
+# Build artifacts
+build/
+dist/
+target/
+*.o
+*.pyc
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+
+# Sensitive data (example)
+config.ini
+.env
