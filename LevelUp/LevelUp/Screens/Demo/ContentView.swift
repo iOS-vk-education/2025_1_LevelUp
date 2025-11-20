@@ -10,9 +10,21 @@ import SwiftData
 
 struct ContentView: View {
     var body: some View {
-        TodayTasksView()
+        TabView {
+            TodayTasksView()
+                .tabItem {
+                    Image(systemName: "target")
+                    Text("Задачи")
+                }
+            ProfileView()
+                .tabItem {
+                    Image(systemName: "person")
+                    Text("Профиль")
+                }
+        }
     }
 }
+
 
 #Preview {
     ContentView()
