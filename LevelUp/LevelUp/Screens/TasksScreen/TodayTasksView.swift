@@ -40,7 +40,6 @@ struct TaskRowView: View {
             }
             Text(task.title)
                 .font(.body)
-                .strikethrough(task.isCompleted)
                 .foregroundColor(task.isCompleted ? .secondary : .primary)
             
             Spacer()
@@ -95,28 +94,78 @@ struct TasksCardView: View {
     }
 }
 
+struct LiquidGlassCircleButton: View {
+    let systemImage: String
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(.thinMaterial)
+                    .overlay(
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        tint.opacity(0.55),
+                                        tint.opacity(0.1)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.6), lineWidth: 1.3)
+                    )
+
+                Image(systemName: systemImage)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                    .shadow(color: Color.black.opacity(0.25),
+                            radius: 4, x: 0, y: 1)
+            }
+            .frame(width: 72, height: 72)
+            .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
+            .shadow(color: Color.white.opacity(0.4), radius: 8, x: 0, y: -3)
+        }
+    }
+}
+
 struct TodayTasksView: View {
     @StateObject private var viewModel = TodayTasksViewModel()
     @State private var newTaskTitle: String = ""
     @State private var isAddingTask: Bool = false
     @FocusState private var isTaskFieldFocused: Bool
+    let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
+//            Color
+//                .blue
+//          Как добавить кастомный задний фон???
             NavigationStack {
-                ScrollView {
+                VStack(spacing: 16) {
+                    HeaderView()
+                    ExperienceSectionView()
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
                 
+                ScrollView {
                     VStack(spacing: 16) {
-                        HeaderView()
-                        ExperienceSectionView()
-                        
                         // Карточка "Сделать"
                         TasksCardView(
                             title: "Сделать",
                             tasks: viewModel.todayTasks,
                             emptyText: "Нет задач",
                             toggleTask: { task in
-                                viewModel.toggleCompletion(for: task)
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.toggleCompletion(for: task)
+                                }
                             }
                         )
                         
@@ -126,7 +175,9 @@ struct TodayTasksView: View {
                             tasks: viewModel.doneTasks,
                             emptyText: "Пока ничего не сделано",
                             toggleTask: { task in
-                                viewModel.toggleCompletion(for: task)
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.toggleCompletion(for: task)
+                                }
                             }
                         )
                         
@@ -137,26 +188,16 @@ struct TodayTasksView: View {
                     .padding(.bottom, 32)
                 }
                 .navigationBarHidden(true)
+                .scrollContentBackground(.hidden)
             }
             
-            // плавающая кнопка "+"
-            Button {
+            LiquidGlassCircleButton(systemImage: "plus", tint: myBlue) {
                 withAnimation {
                     isAddingTask = true
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     isTaskFieldFocused = true
                 }
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(20)
-                    .background(
-                        Circle().fill(Color.blue)
-                    )
-                    .shadow(color: Color.black.opacity(0.2),
-                            radius: 8, x: 0, y: 4)
             }
             .padding(.trailing, 26)
             .padding(.bottom, 40)
@@ -185,7 +226,6 @@ struct TodayTasksView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
                 .padding(.bottom, 8)
-                .background(Color(.systemGray6))
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
