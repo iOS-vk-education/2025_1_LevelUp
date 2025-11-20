@@ -49,28 +49,36 @@ struct TaskRowView: View {
     }
 }
 
+
+struct HabitsCardView: View {
+    var body: some View {
+        Text("Привычки")
+    }
+}
+
 struct TasksCardView: View {
-    let todoTasks: [Task]
-    let doneTasks: [Task]
+    let title: String
+    let tasks: [Task]
+    let emptyText: String
     let toggleTask: (Task) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Сделать")
+            Text(title)
                 .font(.system(size: 20, weight: .semibold))
             
             Divider()
             
-            if todoTasks.isEmpty {
-                Text("Нет задач")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.vertical, 4)
+            if tasks.isEmpty {
+                Text(emptyText)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 4)
             } else {
                 VStack(spacing: 12) {
-                    ForEach(todoTasks) { task in
+                    ForEach(tasks) { task in
                         TaskRowView(task: task) {
-                        toggleTask(task)
+                            toggleTask(task)
                         }
                     }
                 }
@@ -81,17 +89,11 @@ struct TasksCardView: View {
         .background(
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                .shadow(color: Color.black.opacity(0.08),
+                        radius: 8, x: 0, y: 4)
         )
     }
 }
-
-struct HabitsCardView: View {
-    var body: some View {
-        Text("Привычки")
-    }
-}
-
 
 struct TodayTasksView: View {
     @StateObject private var viewModel = TodayTasksViewModel()
@@ -103,13 +105,26 @@ struct TodayTasksView: View {
         ZStack(alignment: .bottomTrailing) {
             NavigationStack {
                 ScrollView {
+                
                     VStack(spacing: 16) {
                         HeaderView()
                         ExperienceSectionView()
                         
+                        // Карточка "Сделать"
                         TasksCardView(
-                            todoTasks: viewModel.todayTasks,
-                            doneTasks: viewModel.doneTasks,
+                            title: "Сделать",
+                            tasks: viewModel.todayTasks,
+                            emptyText: "Нет задач",
+                            toggleTask: { task in
+                                viewModel.toggleCompletion(for: task)
+                            }
+                        )
+                        
+                        // Карточка "Сделано"
+                        TasksCardView(
+                            title: "Сделано",
+                            tasks: viewModel.doneTasks,
+                            emptyText: "Пока ничего не сделано",
                             toggleTask: { task in
                                 viewModel.toggleCompletion(for: task)
                             }
