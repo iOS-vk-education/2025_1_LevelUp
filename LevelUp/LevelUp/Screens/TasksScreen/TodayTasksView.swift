@@ -97,8 +97,10 @@ struct TasksCardView: View {
 struct LiquidGlassCircleButton: View {
     let systemImage: String
     let tint: Color
+    let buttonSize: CGFloat
+    let iconSize: CGFloat
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             ZStack {
@@ -123,12 +125,12 @@ struct LiquidGlassCircleButton: View {
                     )
 
                 Image(systemName: systemImage)
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.system(size: iconSize, weight: .bold))
                     .foregroundColor(.white)
                     .shadow(color: Color.black.opacity(0.25),
                             radius: 4, x: 0, y: 1)
             }
-            .frame(width: 72, height: 72)
+            .frame(width: buttonSize, height: buttonSize)
             .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
             .shadow(color: Color.white.opacity(0.4), radius: 8, x: 0, y: -3)
         }
@@ -191,16 +193,18 @@ struct TodayTasksView: View {
                 .scrollContentBackground(.hidden)
             }
             
-            LiquidGlassCircleButton(systemImage: "plus", tint: myBlue) {
-                withAnimation {
-                    isAddingTask = true
+            if !isAddingTask {
+                LiquidGlassCircleButton(systemImage: "plus", tint: myBlue, buttonSize: 72, iconSize: 26) {
+                    withAnimation {
+                        isAddingTask = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        isTaskFieldFocused = true
+                    }
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    isTaskFieldFocused = true
-                }
+                .padding(.trailing, 26)
+                .padding(.bottom, 40)
             }
-            .padding(.trailing, 26)
-            .padding(.bottom, 40)
         }
         .safeAreaInset(edge: .bottom) {
             if isAddingTask {
@@ -217,11 +221,16 @@ struct TodayTasksView: View {
                         .focused($isTaskFieldFocused)
                         .onSubmit(addTask)
                     
-                    Button(action: addTask) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 36, weight: .semibold))
-                            .foregroundColor(.blue)
+                    LiquidGlassCircleButton(
+                            systemImage: "arrow.up",
+                            tint: myBlue,
+                            buttonSize: 36,
+                            iconSize: 20
+                    ) {
+                        addTask()
                     }
+                    
+                    
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
