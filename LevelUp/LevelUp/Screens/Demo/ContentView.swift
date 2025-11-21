@@ -6,10 +6,8 @@
 //
 
 import SwiftUI
-import SwiftData
-
 struct ContentView: View {
-    @StateObject private var habitViewModel = HabitViewModel()
+    @EnvironmentObject private var habitViewModel: HabitViewModel
 
     var body: some View {
         TabView {
@@ -26,7 +24,6 @@ struct ContentView: View {
                     Label("Профиль", systemImage: "person")
                 }
         }
-        .environmentObject(habitViewModel)
     }
 }
 

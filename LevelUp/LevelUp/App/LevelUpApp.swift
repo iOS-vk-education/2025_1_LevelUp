@@ -3,6 +3,8 @@ import SwiftData
 
 @main
 struct LevelUpApp: App {
+    @StateObject private var sessionManager = SessionManager()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -18,7 +20,8 @@ struct LevelUpApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environmentObject(sessionManager)
         }
         .modelContainer(sharedModelContainer)
     }
