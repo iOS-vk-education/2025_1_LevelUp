@@ -1,1 +1,97 @@
+#############################
+# macOS System
+#############################
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
 
+#############################
+# Xcode
+#############################
+## User data
+**/xcuserdata/
+**/xcuserdata/**/*
+**/*.xcuserstate
+**/*.xcuserdatad
+
+## Schemes
+**/xcshareddata/xcschemes/xcschememanagement.plist
+
+## Build products
+build/
+DerivedData/
+DerivedSources/
+
+## Index
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
+
+## Logs
+*.xcactivitylog
+
+#############################
+# Swift Package Manager
+#############################
+.swiftpm/
+.swiftpm/xcode/
+Packages/
+Package.resolved
+
+#############################
+# CocoaPods
+#############################
+Pods/
+!Podfile
+!Podfile.lock
+
+#############################
+# Carthage
+#############################
+Carthage/Build/
+Carthage/Checkouts/
+
+#############################
+# Fastlane
+#############################
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+fastlane/readme.md
+
+#############################
+# SwiftLint / SwiftFormat
+#############################
+.swiftlint.tmp
+.swiftformat.tmp
+
+#############################
+# AppCode / JetBrains
+#############################
+.idea/
+*.iml
+
+#############################
+# Simulator / Debug Artifacts
+#############################
+*.simdevicetype
+*.simruntime
+*.sym
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+#############################
+# Misc
+#############################
+*.lock
+*.env
+*.key
+*.keystore
+*.log
+
+.DS_Store
+**/.DS_Store
