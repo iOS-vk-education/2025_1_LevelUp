@@ -106,18 +106,6 @@ struct ProfileView: View {
             }
             .padding(.horizontal, 16)
         }
-
-        Spacer()
-        
-        TabView {
-            Tab("Задачи", systemImage: "target") {
-                
-            }
-            Tab("Профиль", systemImage: "person.crop.circle") {
-                ProfileView()
-            }
-        }
-        .frame(height: 50)
     }
 }
 

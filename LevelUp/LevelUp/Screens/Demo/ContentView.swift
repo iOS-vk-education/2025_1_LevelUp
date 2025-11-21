@@ -9,23 +9,29 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @StateObject private var habitViewModel = HabitViewModel()
+
     var body: some View {
         TabView {
             TodayTasksView()
                 .tabItem {
-                    Image(systemName: "target")
-                    Text("Задачи")
+                    Label("Задачи", systemImage: "target")
+                }
+            HabitsView()
+                .tabItem {
+                    Label("Привычки", systemImage: "leaf.circle.fill")
                 }
             ProfileView()
                 .tabItem {
-                    Image(systemName: "person")
-                    Text("Профиль")
+                    Label("Профиль", systemImage: "person")
                 }
         }
+        .environmentObject(habitViewModel)
     }
 }
 
 
 #Preview {
     ContentView()
+        .environmentObject(HabitViewModel())
 }

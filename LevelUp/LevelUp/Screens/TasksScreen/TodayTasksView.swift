@@ -50,8 +50,70 @@ struct TaskRowView: View {
 
 
 struct HabitsCardView: View {
+    let habits: [Habit]
+    let isDone: (Habit) -> Bool
+    let toggle: (Habit) -> Void
+
     var body: some View {
-        Text("Привычки")
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Привычки")
+                .font(.system(size: 20, weight: .semibold))
+
+            Divider()
+
+            if habits.isEmpty {
+                Text("Нет привычек на сегодня")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 4)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(habits) { habit in
+                        HabitCheckboxRow(
+                            habit: habit,
+                            isDone: isDone(habit),
+                            toggle: { toggle(habit) }
+                        )
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.08),
+                        radius: 8, x: 0, y: 4)
+        )
+    }
+}
+
+struct HabitCheckboxRow: View {
+    let habit: Habit
+    let isDone: Bool
+    let toggle: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(action: toggle) {
+                Image(isDone ? "checkbox_checked" : "checkbox_unchecked")
+                    .resizable()
+                    .frame(width: 20, height: 20)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(habit.title.isEmpty ? "Без названия" : habit.title)
+                    .font(.body)
+                    .foregroundColor(isDone ? .secondary : .primary)
+                if !habit.description.trimmingCharacters(in: .whitespaces).isEmpty {
+                    Text(habit.description)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 4)
     }
 }
 
@@ -139,6 +201,7 @@ struct LiquidGlassCircleButton: View {
 
 struct TodayTasksView: View {
     @StateObject private var viewModel = TodayTasksViewModel()
+    @EnvironmentObject private var habitsViewModel: HabitViewModel
     @State private var newTaskTitle: String = ""
     @State private var isAddingTask: Bool = false
     @FocusState private var isTaskFieldFocused: Bool
@@ -182,8 +245,16 @@ struct TodayTasksView: View {
                                 }
                             }
                         )
-                        
-                        HabitsCardView()
+
+                        HabitsCardView(
+                            habits: habitsForToday,
+                            isDone: { habitsViewModel.isHabitDone($0, on: habitsViewModel.selectedDate) },
+                            toggle: { habit in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    habitsViewModel.toggleHabit(habit, on: habitsViewModel.selectedDate)
+                                }
+                            }
+                        )
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
@@ -239,20 +310,25 @@ struct TodayTasksView: View {
             }
         }
     }
-    
+
     private func addTask() {
         let trimmed = newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        
+
         viewModel.addTask(title: trimmed)
         newTaskTitle = ""
-        
+
         withAnimation {
             isAddingTask = false
         }
         isTaskFieldFocused = false
     }
+
+    private var habitsForToday: [Habit] {
+        habitsViewModel.visibleHabits(on: habitsViewModel.selectedDate)
+    }
 }
 #Preview {
     TodayTasksView()
+        .environmentObject(HabitViewModel())
 }

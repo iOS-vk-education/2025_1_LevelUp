@@ -2,11 +2,12 @@ import SwiftUI
 
 struct HabitsView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @StateObject private var viewModel = HabitViewModel()
+    @EnvironmentObject private var viewModel: HabitViewModel
     @FocusState private var isTitleFieldFocused: Bool
+    private let habitAccent = Color(red: 0.30, green: 0.60, blue: 0.98)
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottomTrailing) {
             Color(.systemGroupedBackground)
                 .ignoresSafeArea()
 
@@ -28,7 +29,8 @@ struct HabitsView: View {
             }
 
             addButton
-                .padding(.bottom, 20)
+                .padding(.trailing, 26)
+                .padding(.bottom, 40)
         }
         .sheet(item: $viewModel.editingHabit) { habit in
             HabitEditSheet(
@@ -41,13 +43,10 @@ struct HabitsView: View {
     }
 
     private var header: some View {
-        HStack {
-            Spacer()
-            Text("Привычки")
-                .font(.title2.bold())
-                .foregroundStyle(.primary)
-            Spacer()
-        }
+        Text("Привычки")
+            .font(.system(size: 32, weight: .bold))
+            .frame(maxWidth: .infinity, alignment: .center)
+            .foregroundStyle(.primary)
     }
 
     private var habitCard: some View {
@@ -72,18 +71,13 @@ struct HabitsView: View {
     }
 
     private var addButton: some View {
-        Button(action: { viewModel.beginCreate(on: viewModel.selectedDate) }) {
-            Image(systemName: "plus")
-                .font(.system(size: 22, weight: .bold))
-                .frame(width: 60, height: 60)
-                .foregroundStyle(.white)
-                .background(
-                    Circle()
-                        .fill(Color.blue)
-                        .shadow(color: Color.blue.opacity(0.25), radius: 12, x: 0, y: 6)
-                )
-        }
-        .buttonStyle(.plain)
+        LiquidGlassCircleButton(
+            systemImage: "plus",
+            tint: habitAccent,
+            buttonSize: 72,
+            iconSize: 26,
+            action: { viewModel.beginCreate(on: viewModel.selectedDate) }
+        )
         .accessibilityLabel("Add habit")
     }
 
@@ -94,4 +88,5 @@ struct HabitsView: View {
 
 #Preview {
     HabitsView()
+        .environmentObject(HabitViewModel())
 }
