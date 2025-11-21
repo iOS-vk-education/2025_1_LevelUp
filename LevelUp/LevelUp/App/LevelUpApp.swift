@@ -1,10 +1,3 @@
-//
-//  LevelUpApp.swift
-//  LevelUp
-//
-//  Created by Андрей Прибавкин on 9.11.25.
-//
-
 import SwiftUI
 import SwiftData
 
