@@ -248,10 +248,10 @@ struct TodayTasksView: View {
 
                         HabitsCardView(
                             habits: habitsForToday,
-                            isDone: { habitsViewModel.isHabitDone($0, on: habitsViewModel.selectedDate) },
+                            isDone: { habitsViewModel.isHabitDone($0, on: todayDate) },
                             toggle: { habit in
                                 withAnimation(.easeInOut(duration: 0.2)) {
-                                    habitsViewModel.toggleHabit(habit, on: habitsViewModel.selectedDate)
+                                    habitsViewModel.toggleHabit(habit, on: todayDate)
                                 }
                             }
                         )
@@ -325,7 +325,11 @@ struct TodayTasksView: View {
     }
 
     private var habitsForToday: [Habit] {
-        habitsViewModel.visibleHabits(on: habitsViewModel.selectedDate)
+        habitsViewModel.visibleHabits(on: todayDate)
+    }
+
+    private var todayDate: Date {
+        Calendar.current.startOfDay(for: Date())
     }
 }
 #Preview {
