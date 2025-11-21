@@ -1,29 +1,97 @@
-# Operating System files
+#############################
+# macOS System
+#############################
 .DS_Store
-Thumbs.db
+.AppleDouble
+.LSOverride
+Icon?
+._*
 
-# Editor/IDE files
-.idea/
-.vscode/
-*.swp
+#############################
+# Xcode
+#############################
+## User data
+**/xcuserdata/
+**/xcuserdata/**/*
+**/*.xcuserstate
+**/*.xcuserdatad
 
-# Build artifacts
+## Schemes
+**/xcshareddata/xcschemes/xcschememanagement.plist
+
+## Build products
 build/
-dist/
-target/
-*.o
-*.pyc
+DerivedData/
+DerivedSources/
 
-# Dependency directories
-node_modules/
-vendor/
+## Index
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
 
-# Log files
+## Logs
+*.xcactivitylog
+
+#############################
+# Swift Package Manager
+#############################
+.swiftpm/
+.swiftpm/xcode/
+Packages/
+Package.resolved
+
+#############################
+# CocoaPods
+#############################
+Pods/
+!Podfile
+!Podfile.lock
+
+#############################
+# Carthage
+#############################
+Carthage/Build/
+Carthage/Checkouts/
+
+#############################
+# Fastlane
+#############################
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+fastlane/readme.md
+
+#############################
+# SwiftLint / SwiftFormat
+#############################
+.swiftlint.tmp
+.swiftformat.tmp
+
+#############################
+# AppCode / JetBrains
+#############################
+.idea/
+*.iml
+
+#############################
+# Simulator / Debug Artifacts
+#############################
+*.simdevicetype
+*.simruntime
+*.sym
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+#############################
+# Misc
+#############################
+*.lock
+*.env
+*.key
+*.keystore
 *.log
 
-# Temporary files
-*.tmp
-
-# Sensitive data (example)
-config.ini
-.env
+.DS_Store
+**/.DS_Store
