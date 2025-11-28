@@ -26,7 +26,8 @@ struct ProfileView: View {
                         maxHeight: maxProfileWidth)
                     .clipShape(Circle())
                 
-                ProgressBarView(current: 55, maximum: 120, level: 7)
+                let info = Statistics.shared.getLevelInfo()
+                ProgressBarView(current: info.currentLevelXP, maximum: info.nextLevelXP, level: info.level)
                     .padding(.bottom, 8)
                 
                 let completed = achievements.count { ach in ach.completed }

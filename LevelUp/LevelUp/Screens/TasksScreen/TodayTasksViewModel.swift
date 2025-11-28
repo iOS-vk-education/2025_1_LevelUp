@@ -41,6 +41,12 @@ final class TodayTasksViewModel: ObservableObject {
     func toggleCompletion(for task:Task) {
         guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
         allTasks[index].isCompleted.toggle()
+        
+        if allTasks[index].isCompleted {
+            Statistics.shared.addXPPoint(point: Point(date: task.date, value: 100))
+        } else {
+            Statistics.shared.delXPPoint(point: Point(date: task.date, value: 100))
+        }
     }
     
     func addTask(title: String) {

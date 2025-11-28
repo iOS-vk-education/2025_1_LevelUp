@@ -7,6 +7,8 @@
 
 import Foundation
 import SwiftUI
+import Combine
+
 
 struct Point: Codable {
     var id: UUID = UUID()
@@ -39,9 +41,12 @@ extension Array: @retroactive RawRepresentable where Element: Codable {
     }
 }
 
-
-class Statistics {
+class Statistics: ObservableObject {
     @AppStorage("xpPoints") var xpPoints: [Point] = []
+    
+    static let shared = Statistics()
+    
+    private init() {}
     
     func addXPPoint(point: Point) {
         xpPoints.append(point)
@@ -52,5 +57,24 @@ class Statistics {
         if let safeIdx = idx {
             xpPoints.remove(at: safeIdx)
         }
+    }
+    
+    let xpByLevel = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+    
+    struct LevelInfo {
+        let level: Int
+        let currentLevelXP: Int
+        let nextLevelXP: Int
+    }
+    
+    func getLevelInfo() -> LevelInfo {
+        var totalXP = xpPoints.reduce(0) { a, b in a + b.value }
+        for i in 0..<xpByLevel.count {
+            if totalXP < xpByLevel[i] {
+                return LevelInfo(level: i + 1, currentLevelXP: totalXP, nextLevelXP: xpByLevel[i])
+            }
+            totalXP -= xpByLevel[i]
+        }
+        return LevelInfo(level: xpByLevel.count + 1, currentLevelXP: 0, nextLevelXP: 0)
     }
 }
