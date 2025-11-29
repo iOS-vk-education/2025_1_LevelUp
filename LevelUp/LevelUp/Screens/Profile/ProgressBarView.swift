@@ -35,9 +35,11 @@ struct ProgressBarView: View {
             }
             .frame(height: height)
             
-            Text("\(current) / \(maximum)")
-                .hiddenText()
-                .frame(maxWidth: .infinity, alignment: .trailing)
+            if maximum > 0 {
+                Text("\(current) / \(maximum)")
+                    .hiddenText()
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
         }
     }
 }
@@ -46,8 +48,8 @@ struct ProgressBarView: View {
 
 #Preview {
     ProgressBarView(
-        current: 40,
-        maximum: 100,
+        current: 0,
+        maximum: 0,
         level: 11,
     )
     .padding(16)
