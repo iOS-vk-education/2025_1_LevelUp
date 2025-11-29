@@ -42,11 +42,18 @@ extension Array: @retroactive RawRepresentable where Element: Codable {
 }
 
 class Statistics: ObservableObject {
-    @AppStorage("xpPoints") var xpPoints: [Point] = []
-    
+    @AppStorage("xpPoints") var storedXpPoints: [Point] = []
+    @Published var xpPoints: [Point] = [] {
+        didSet {
+            storedXpPoints = xpPoints
+        }
+    }
+
     static let shared = Statistics()
     
-    private init() {}
+    private init() {
+        xpPoints = storedXpPoints
+    }
     
     func addXPPoint(point: Point) {
         xpPoints.append(point)

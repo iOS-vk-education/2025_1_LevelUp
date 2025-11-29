@@ -11,6 +11,8 @@ import SwiftUI
 struct ProfileView: View {
     let maxProfileWidth: CGFloat = 200;
     
+    @ObservedObject var stats: Statistics = .shared
+    
     var body: some View {
         ZStack {
             Color.init(hex: 0xe2e2e6)
@@ -26,7 +28,7 @@ struct ProfileView: View {
                         maxHeight: maxProfileWidth)
                     .clipShape(Circle())
                 
-                let info = Statistics.shared.getLevelInfo()
+                let info = stats.getLevelInfo()
                 ProgressBarView(current: info.currentLevelXP, maximum: info.nextLevelXP, level: info.level)
                     .padding(.bottom, 8)
                 
