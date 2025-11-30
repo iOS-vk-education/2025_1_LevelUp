@@ -11,9 +11,9 @@ struct AchievementView: View {
     let achievement: Achievement
 
     var body: some View {
-        let icon = achievement.completed ?
-            Image(systemName: "medal.fill").foregroundColor(.gray) :
-            Image(systemName: "medal.fill").foregroundColor(.yellow)
+        let icon = achievement.isCompleted ?
+            Image(systemName: "medal.fill").foregroundColor(.yellow) :
+            Image(systemName: "medal.fill").foregroundColor(.gray)
         let shape = RoundedRectangle(cornerRadius: 20)
 
         VStack {
