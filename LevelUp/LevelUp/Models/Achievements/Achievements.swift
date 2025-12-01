@@ -7,17 +7,23 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
-class Achievement: Identifiable {
+
+// todo: удалить изменение состояния из get
+class Achievement: Identifiable, ObservableObject {
     let id = UUID()
     let title: String
     let description: String
-    private(set) var achievedOn: Date? = nil
     let tint: Color
     let wage: Int
     
+    @Published
+    private(set) var achievedOn: Date? = nil
+
     let isCompletedNow: () -> Bool
     private var _hasEverCompleted: Bool = false
+
     var isCompleted: Bool {
         get {
             if _hasEverCompleted {
@@ -30,12 +36,11 @@ class Achievement: Identifiable {
             return _hasEverCompleted
         }
         set {
+            let newValue = isCompletedNow()
+            guard newValue != _hasEverCompleted else { return }
+
             _hasEverCompleted = newValue
-            if newValue && achievedOn == nil {
-                achievedOn = Date()
-            } else if !newValue {
-                achievedOn = nil
-            }
+            achievedOn = newValue ? Date() : nil
         }
     }
 
@@ -124,7 +129,7 @@ let HabitsIsAllWeHaveAch = Achievement(
     tint: .green,
     wage: 10,
     isCompleted: {
-        return false
+        CompletedHabits.shared.count > 0
     }
 )
 
@@ -134,7 +139,7 @@ let HabitsIsAllWeHave2Ach = Achievement(
     tint: .green,
     wage: 10,
     isCompleted: {
-        return false
+        CompletedHabits.shared.count >= 10
     }
 )
 
@@ -144,10 +149,34 @@ let HabitsIsAllWeHave3Ach = Achievement(
     tint: .green,
     wage: 10,
     isCompleted: {
-        return false
+        CompletedHabits.shared.count >= 100
     }
 )
 
+
+private func countProductiveDays() -> Int {
+    var count = 0
+    var lastDay: DateComponents? = nil
+    var currentSum = 0
+    for point in Statistics.shared.xpPoints {
+        let calendar = Calendar.current
+        let day = calendar.dateComponents([.day, .month, .year], from: point.date)
+        let xp = point.value
+        if day != lastDay {
+            if currentSum >= 300 {
+                count += 1;
+            }
+            lastDay = day
+            currentSum = xp
+        } else {
+            currentSum += xp
+        }
+    }
+    if currentSum >= 300 {
+        count += 1
+    }
+    return count
+}
 
 let ProductiveDayAch = Achievement(
     title: "Продуктивный день",
@@ -155,7 +184,7 @@ let ProductiveDayAch = Achievement(
     tint: .green,
     wage: 10,
     isCompleted: {
-        return false
+        return countProductiveDays() > 0
     }
 )
 
@@ -165,7 +194,7 @@ let ProductiveDay2Ach = Achievement(
     tint: .green,
     wage: 10,
     isCompleted: {
-        return false
+        return countProductiveDays() >= 10
     }
 )
 
@@ -175,23 +204,29 @@ let ProductiveDay3Ach = Achievement(
     tint: .green,
     wage: 10,
     isCompleted: {
-        return false
+        return countProductiveDays() >= 300
     }
 )
 
 
-let achievements: [Achievement] = [
-    TasksLordAch,
-    TasksLord2Ach,
-    TasksLord3Ach,
-    LevelUpAch,
-    LevelUp2Ach,
-    LevelUp3Ach,
-    ProductivemorningAch,
-    HabitsIsAllWeHaveAch,
-    HabitsIsAllWeHave2Ach,
-    HabitsIsAllWeHave3Ach,
-    ProductiveDayAch,
-    ProductiveDay2Ach,
-    ProductiveDay3Ach,
-]
+final class AchievementsStorage: ObservableObject {
+    static let shared = AchievementsStorage()
+
+    @Published var achs: [Achievement] = [
+        TasksLordAch,
+        TasksLord2Ach,
+        TasksLord3Ach,
+        LevelUpAch,
+        LevelUp2Ach,
+        LevelUp3Ach,
+        ProductivemorningAch,
+        HabitsIsAllWeHaveAch,
+        HabitsIsAllWeHave2Ach,
+        HabitsIsAllWeHave3Ach,
+        ProductiveDayAch,
+        ProductiveDay2Ach,
+        ProductiveDay3Ach,
+    ]
+
+    private init() {}
+}

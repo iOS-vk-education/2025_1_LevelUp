@@ -12,6 +12,7 @@ struct ProfileView: View {
     let maxProfileWidth: CGFloat = 200;
     
     @ObservedObject var stats: Statistics = .shared
+    @ObservedObject var achievements = AchievementsStorage.shared
     
     var body: some View {
         ZStack {
@@ -32,14 +33,14 @@ struct ProfileView: View {
                 ProgressBarView(current: info.currentLevelXP, maximum: info.nextLevelXP, level: info.level)
                     .padding(.bottom, 8)
                 
-                let completed = achievements.count { ach in ach.isCompleted }
-                Text("Выполненно \(completed) из \(achievements.count) достижений")
+                let completed = achievements.achs.count { ach in ach.isCompleted }
+                Text("Выполненно \(completed) из \(achievements.achs.count) достижений")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
-                    ForEach(achievements) { achievement in
+                    ForEach(achievements.achs) { achievement in
                         AchievementView(achievement: achievement)
                     }
                 }

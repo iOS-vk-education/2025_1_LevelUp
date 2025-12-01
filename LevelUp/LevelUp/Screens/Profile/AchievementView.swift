@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct AchievementView: View {
-    let achievement: Achievement
+    @ObservedObject
+    var achievement: Achievement
 
     var body: some View {
         let icon = achievement.isCompleted ?
@@ -44,7 +45,7 @@ struct AchievementView: View {
 
 #Preview {
     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
-        ForEach(achievements) { achievement in
+        ForEach(AchievementsStorage.shared.achs) { achievement in
             AchievementView(achievement: achievement)
         }
     }
