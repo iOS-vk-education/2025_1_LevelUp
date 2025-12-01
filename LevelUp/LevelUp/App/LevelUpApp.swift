@@ -5,6 +5,12 @@ import SwiftData
 struct LevelUpApp: App {
     @StateObject private var sessionManager = SessionManager()
 
+    init() {
+        #if DEBUG
+        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+        #endif
+    }
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
