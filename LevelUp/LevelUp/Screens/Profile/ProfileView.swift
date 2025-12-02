@@ -33,8 +33,7 @@ struct ProfileView: View {
                 ProgressBarView(current: info.currentLevelXP, maximum: info.nextLevelXP, level: info.level)
                     .padding(.bottom, 8)
                 
-                let completed = achievements.achs.count { ach in ach.isCompleted }
-                Text("Выполненно \(completed) из \(achievements.achs.count) достижений")
+                Text("Выполненно \(achievements.nCompleted) из \(achievements.achs.count) достижений")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
@@ -52,6 +51,9 @@ struct ProfileView: View {
                 }
             }
             .padding(.horizontal, 16)
+        }
+        .onAppear {
+            achievements.recalculateAll()
         }
     }
     

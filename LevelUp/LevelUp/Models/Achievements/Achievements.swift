@@ -10,39 +10,16 @@ import SwiftUI
 import Combine
 
 
-// todo: удалить изменение состояния из get
 class Achievement: Identifiable, ObservableObject {
     let id = UUID()
     let title: String
     let description: String
     let tint: Color
     let wage: Int
-    
+    let isCompletedNow: () -> Bool
+
     @Published
     private(set) var achievedOn: Date? = nil
-
-    let isCompletedNow: () -> Bool
-    private var _hasEverCompleted: Bool = false
-
-    var isCompleted: Bool {
-        get {
-            if _hasEverCompleted {
-                return true
-            }
-            _hasEverCompleted = isCompletedNow()
-            if _hasEverCompleted {
-                achievedOn = Date()
-            }
-            return _hasEverCompleted
-        }
-        set {
-            let newValue = isCompletedNow()
-            guard newValue != _hasEverCompleted else { return }
-
-            _hasEverCompleted = newValue
-            achievedOn = newValue ? Date() : nil
-        }
-    }
 
     init(
         title: String,
@@ -56,6 +33,24 @@ class Achievement: Identifiable, ObservableObject {
         self.tint = tint
         self.wage = wage
         self.isCompletedNow = isCompleted
+    }
+
+    var isCompleted: Bool {
+        get {
+            return achievedOn != nil
+        }
+        set {
+            guard newValue != (achievedOn != nil) else { return }
+
+            achievedOn = newValue ? Date() : nil
+        }
+    }
+    
+    func recalculate() {
+        guard !isCompleted else { return }
+        if isCompletedNow() {
+            achievedOn = Date()
+        }
     }
 }
 
@@ -227,6 +222,16 @@ final class AchievementsStorage: ObservableObject {
         ProductiveDay2Ach,
         ProductiveDay3Ach,
     ]
+    
+    @Published
+    private(set) var nCompleted = 0
 
-    private init() {}
+    private init() {
+        nCompleted = achs.count { ach in ach.isCompleted }
+    }
+    
+    func recalculateAll() {
+        achs.forEach { $0.recalculate() }
+        nCompleted = achs.count { ach in ach.isCompleted }
+    }
 }
