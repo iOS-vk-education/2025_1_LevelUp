@@ -25,7 +25,7 @@ struct AchievementView: View {
 
             VStack(alignment: .leading) {
                 Text(achievement.title)
-                    .font(.system(size: 16, weight: .regular))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.primary)
                 Text(achievement.description)
                     .hiddenText()

@@ -57,6 +57,7 @@ class Achievement: Identifiable, ObservableObject {
         if _currentScore >= goal {
             achievedOn = Date()
             Statistics.shared.addExtraWage(wage)
+            AchievementsStorage.shared.nCompleted += 1
         }
     }
 }
@@ -70,7 +71,7 @@ let TasksLordAch = Achievement(
     wage: 10,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
-        
+
 let TasksLord2Ach = Achievement(
     title: "Покоритель задач 2",
     description: "Выполните 100 задач",
@@ -92,34 +93,39 @@ let TasksLord3Ach = Achievement(
 )
 
 
+func getCurrentLevel() -> Int {
+    @ObservedObject var stats: Statistics = .shared
+    return stats.getLevelInfo().level
+}
+
 let LevelUpAch = Achievement(
     title: "LevelUp",
     description: "Достигните второго уровня",
     goal: 2,
-    tint: .yellow,
+    tint: .orange,
     icon: Image(systemName: "chevron.up.2"),
     wage: 10,
-    getCurrent: { Statistics.shared.getLevelInfo().level }
+    getCurrent: getCurrentLevel
 )
 
 let LevelUp2Ach = Achievement(
     title: "LevelUp 2",
     description: "Достигните 10 уровня",
     goal: 10,
-    tint: .yellow,
+    tint: .orange,
     icon: Image(systemName: "chevron.up.2"),
     wage: 10,
-    getCurrent: { Statistics.shared.getLevelInfo().level }
+    getCurrent: getCurrentLevel
 )
 
 let LevelUp3Ach = Achievement(
     title: "LevelUp 3",
     description: "Достигните 50 уровня",
     goal: 50,
-    tint: .yellow,
+    tint: .orange,
     icon: Image(systemName: "chevron.up.2"),
     wage: 10,
-    getCurrent: { Statistics.shared.getLevelInfo().level }
+    getCurrent: getCurrentLevel
 )
 
 let ProductivemorningAch = Achievement(
@@ -248,7 +254,6 @@ final class AchievementsStorage: ObservableObject {
     static let shared = AchievementsStorage()
 
     @Published var achs: [Achievement] = [
-        AlwaysCompletedAch,
         TasksLordAch,
         TasksLord2Ach,
         TasksLord3Ach,
@@ -265,14 +270,11 @@ final class AchievementsStorage: ObservableObject {
     ]
     
     @Published
-    private(set) var nCompleted = 0
+    fileprivate(set) var nCompleted = 0
 
     private init() {
-        nCompleted = achs.count { ach in ach.isCompleted }
-    }
-    
-    func recalculateAll() {
-        achs.forEach { $0.recalculate() }
-        nCompleted = achs.count { ach in ach.isCompleted }
+    #if DEBUG
+        achs.insert(AlwaysCompletedAch, at: 0)
+    #endif
     }
 }
