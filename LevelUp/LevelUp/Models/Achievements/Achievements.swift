@@ -14,9 +14,11 @@ class Achievement: Identifiable, ObservableObject {
     let id = UUID()
     let title: String
     let description: String
+    let goal: Int
     let tint: Color
+    let icon: Image
     let wage: Int
-    let isCompletedNow: () -> Bool
+    private let getCurrent: () -> Int
 
     @Published
     private(set) var achievedOn: Date? = nil
@@ -24,32 +26,37 @@ class Achievement: Identifiable, ObservableObject {
     init(
         title: String,
         description: String,
+        goal: Int,
         tint: Color,
+        icon: Image,
         wage: Int,
-        isCompleted: @escaping () -> Bool,
+        getCurrent: @escaping () -> Int,
     ) {
         self.title = title
         self.description = description
+        self.goal = goal
         self.tint = tint
+        self.icon = icon
         self.wage = wage
-        self.isCompletedNow = isCompleted
+        self.getCurrent = getCurrent
     }
 
     var isCompleted: Bool {
-        get {
-            return achievedOn != nil
-        }
-        set {
-            guard newValue != (achievedOn != nil) else { return }
-
-            achievedOn = newValue ? Date() : nil
-        }
+        return achievedOn != nil
+    }
+    
+    @Published
+    private var _currentScore: Int = 0
+    var currentScore: Int {
+        _currentScore
     }
     
     func recalculate() {
         guard !isCompleted else { return }
-        if isCompletedNow() {
+        _currentScore = getCurrent()
+        if _currentScore >= goal {
             achievedOn = Date()
+            Statistics.shared.addExtraWage(wage)
         }
     }
 }
@@ -57,59 +64,73 @@ class Achievement: Identifiable, ObservableObject {
 let TasksLordAch = Achievement(
     title: "Покоритель задач",
     description: "Выполните первую задачу",
-    tint: .blue,
+    goal: 1,
+    tint: .green,
+    icon: Image(systemName: "checkmark.seal.fill"),
     wage: 10,
-    isCompleted: { !Statistics.shared.xpPoints.isEmpty }
+    getCurrent: { Statistics.shared.xpPoints.count }
 )
         
 let TasksLord2Ach = Achievement(
     title: "Покоритель задач 2",
     description: "Выполните 100 задач",
-    tint: .blue,
+    goal: 100,
+    tint: .green,
+    icon: Image(systemName: "checkmark.seal.fill"),
     wage: 10,
-    isCompleted: { Statistics.shared.xpPoints.count >= 100 }
+    getCurrent: { Statistics.shared.xpPoints.count }
 )
 
 let TasksLord3Ach = Achievement(
     title: "Покоритель задач 3",
     description: "Выполните 1000 задач",
-    tint: .blue,
+    goal: 1000,
+    tint: .green,
+    icon: Image(systemName: "checkmark.seal.fill"),
     wage: 10,
-    isCompleted: { Statistics.shared.xpPoints.count >= 1000 }
+    getCurrent: { Statistics.shared.xpPoints.count }
 )
 
 
 let LevelUpAch = Achievement(
     title: "LevelUp",
     description: "Достигните второго уровня",
-    tint: .green,
+    goal: 2,
+    tint: .yellow,
+    icon: Image(systemName: "chevron.up.2"),
     wage: 10,
-    isCompleted: { Statistics.shared.getLevelInfo().level >= 2 }
+    getCurrent: { Statistics.shared.getLevelInfo().level }
 )
 
 let LevelUp2Ach = Achievement(
     title: "LevelUp 2",
     description: "Достигните 10 уровня",
-    tint: .green,
+    goal: 10,
+    tint: .yellow,
+    icon: Image(systemName: "chevron.up.2"),
     wage: 10,
-    isCompleted: { Statistics.shared.getLevelInfo().level >= 10 }
+    getCurrent: { Statistics.shared.getLevelInfo().level }
 )
 
 let LevelUp3Ach = Achievement(
     title: "LevelUp 3",
     description: "Достигните 50 уровня",
-    tint: .green,
+    goal: 50,
+    tint: .yellow,
+    icon: Image(systemName: "chevron.up.2"),
     wage: 10,
-    isCompleted: { Statistics.shared.getLevelInfo().level >= 50 }
+    getCurrent: { Statistics.shared.getLevelInfo().level }
 )
 
 let ProductivemorningAch = Achievement(
     title: "Продуктивное утро",
     description: "Выполните задачу от 5:00 до 9:00 утра",
-    tint: .green,
+    goal: 1,
+    tint: .pink,
+    icon: Image(systemName: "sunrise.fill"),
     wage: 10,
-    isCompleted: {
-        return Statistics.shared.xpPoints.contains { point in
+    getCurrent: {
+        return Statistics.shared.xpPoints.count { point in
             let calendar = Calendar.current
             let h = calendar.component(.hour, from: point.date)
             return 5 <= h && h <= 9
@@ -121,30 +142,36 @@ let ProductivemorningAch = Achievement(
 let HabitsIsAllWeHaveAch = Achievement(
     title: "Привычки наше все",
     description: "Внедрите первую привычку",
-    tint: .green,
+    goal: 1,
+    tint: .red,
+    icon: Image(systemName: "repeat.circle.fill"),
     wage: 10,
-    isCompleted: {
-        CompletedHabits.shared.count > 0
+    getCurrent: {
+        CompletedHabits.shared.count
     }
 )
 
 let HabitsIsAllWeHave2Ach = Achievement(
     title: "Привычки наше все 2",
     description: "Внедрите 10 привычек",
-    tint: .green,
+    goal: 10,
+    tint: .red,
+    icon: Image(systemName: "repeat.circle.fill"),
     wage: 10,
-    isCompleted: {
-        CompletedHabits.shared.count >= 10
+    getCurrent: {
+        CompletedHabits.shared.count
     }
 )
 
 let HabitsIsAllWeHave3Ach = Achievement(
     title: "Привычки наше все 3",
     description: "Внедрите 100 привычек",
-    tint: .green,
+    goal: 100,
+    tint: .red,
+    icon: Image(systemName: "repeat.circle.fill"),
     wage: 10,
-    isCompleted: {
-        CompletedHabits.shared.count >= 100
+    getCurrent: {
+        CompletedHabits.shared.count
     }
 )
 
@@ -176,30 +203,43 @@ private func countProductiveDays() -> Int {
 let ProductiveDayAch = Achievement(
     title: "Продуктивный день",
     description: "Заработайте за день 300 xp",
-    tint: .green,
+    goal: 1,
+    tint: .purple,
+    icon: Image(systemName: "brain.head.profile"),
     wage: 10,
-    isCompleted: {
-        return countProductiveDays() > 0
-    }
+    getCurrent: countProductiveDays
 )
 
 let ProductiveDay2Ach = Achievement(
     title: "Продуктивный день 2",
     description: "Заработайте за день 300 xp 10 раз",
-    tint: .green,
+    goal: 10,
+    tint: .purple,
+    icon: Image(systemName: "brain.head.profile"),
     wage: 10,
-    isCompleted: {
-        return countProductiveDays() >= 10
-    }
+    getCurrent: countProductiveDays
 )
 
 let ProductiveDay3Ach = Achievement(
     title: "Продуктивный день 3",
     description: "Заработайте за день 300 xp 100 раз",
-    tint: .green,
+    goal: 100,
+    tint: .purple,
+    icon: Image(systemName: "brain.head.profile"),
     wage: 10,
-    isCompleted: {
-        return countProductiveDays() >= 300
+    getCurrent: countProductiveDays
+)
+
+
+let AlwaysCompletedAch = Achievement(
+    title: "Достижение для тестирования",
+    description: "Ничего не надо делать",
+    goal: 0,
+    tint: .red,
+    icon: Image(systemName: "party.popper.fill"),
+    wage: 1000,
+    getCurrent: {
+        return 1
     }
 )
 
@@ -208,6 +248,7 @@ final class AchievementsStorage: ObservableObject {
     static let shared = AchievementsStorage()
 
     @Published var achs: [Achievement] = [
+        AlwaysCompletedAch,
         TasksLordAch,
         TasksLord2Ach,
         TasksLord3Ach,

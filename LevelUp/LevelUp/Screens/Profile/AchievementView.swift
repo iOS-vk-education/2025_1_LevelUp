@@ -12,43 +12,80 @@ struct AchievementView: View {
     var achievement: Achievement
 
     var body: some View {
-        let icon = achievement.isCompleted ?
-            Image(systemName: "medal.fill").foregroundColor(.yellow) :
-            Image(systemName: "medal.fill").foregroundColor(.gray)
-        let shape = RoundedRectangle(cornerRadius: 20)
+        HStack {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(achievement.tint.opacity(0.15))
+                    .frame(width: 55, height: 55)
 
-        VStack {
-            Text(achievement.title)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
-                .overlay(alignment: .leading) {
-                    icon.frame(alignment: .leading)
+                let iconColor = achievement.isCompleted ? achievement.tint : Color.gray
+                achievement.icon
+                    .foregroundStyle(iconColor)
+            }
+
+            VStack(alignment: .leading) {
+                Text(achievement.title)
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(.primary)
+                Text(achievement.description)
+                    .hiddenText()
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.green.opacity(0.15))
+                        .frame(height: 16)
+                    
+                    GeometryReader { geo in
+                        let percent = achievement.isCompleted ? 1.0 :
+                        Double(achievement.currentScore) / Double(achievement.goal)
+                        let width: CGFloat = CGFloat(percent) * geo.size.width
+                        
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(.green)
+                            .frame(width: max(0, width), height: 16)
+                    }
+                    .frame(height: 16)
+                    
+                    let barText = achievement.isCompleted ?
+                        "Выполнено" :
+                        "\(achievement.currentScore) / \(achievement.goal)"
+                    Text(barText)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
                 }
-            Text(achievement.description)
-                .hiddenText()
-                .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: 200)
+            Spacer()
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.brown.opacity(0.15))
+                    .strokeBorder(.black, lineWidth: 2)
+                if achievement.isCompleted {
+                    Text(ruDateFormat(achievement.achievedOn!))
+                            .hiddenText()
+                } else {
+                    Text("\(achievement.wage)\nxp")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                }
+            }
+            .frame(width: 55, height: 55)
         }
-            .padding()
-            .frame(maxWidth: .infinity, minHeight: 100)
-            .glassEffect(
-                .regular.tint(.blue.opacity(0.2)).interactive(),
-                in: shape)
-            .background(
-                Color(hex: 0xe2c6fb)
-                    .clipShape(shape)
-            )
+        .frame(maxWidth: .infinity)
+        .onAppear {
+            achievement.recalculate()
+        }
     }
 }
 
 #Preview {
-    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
-        ForEach(AchievementsStorage.shared.achs) { achievement in
-            AchievementView(achievement: achievement)
+    ScrollView {
+        LazyVGrid(columns: [GridItem(.flexible())]) {
+            ForEach(AchievementsStorage.shared.achs) { achievement in
+                AchievementView(achievement: achievement)
+                Divider()
+            }
         }
     }
-    .padding(32)
+    .padding(16)
     
 }

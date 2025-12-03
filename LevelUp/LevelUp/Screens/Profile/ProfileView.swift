@@ -38,22 +38,15 @@ struct ProfileView: View {
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
 
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
-                    ForEach(achievements.achs) { achievement in
+                LazyVGrid(columns: [GridItem(.flexible())]) {
+                    ForEach(AchievementsStorage.shared.achs) { achievement in
                         AchievementView(achievement: achievement)
+                        Divider()
                     }
                 }
                 .padding(16)
-                .background {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(.blue.opacity(0.2))
-                        .overlay(.thinMaterial)
-                }
             }
             .padding(.horizontal, 16)
-        }
-        .onAppear {
-            achievements.recalculateAll()
         }
     }
     

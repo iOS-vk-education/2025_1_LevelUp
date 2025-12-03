@@ -48,7 +48,15 @@ class Statistics: ObservableObject {
             storedXpPoints = xpPoints
         }
     }
+    
+    @AppStorage("extraXpWage") var storedExtraXpWage: Int = 0
+    @Published var extraXpWage: Int = 0 {
+        didSet {
+            storedExtraXpWage = extraXpWage
+        }
+    }
 
+    
     static let shared = Statistics()
     
     private init() {
@@ -76,6 +84,7 @@ class Statistics: ObservableObject {
     
     func getLevelInfo() -> LevelInfo {
         var totalXP = xpPoints.reduce(0) { a, b in a + b.value }
+        totalXP += extraXpWage
         for i in 0..<xpByLevel.count {
             if totalXP < xpByLevel[i] {
                 return LevelInfo(level: i + 1, currentLevelXP: totalXP, nextLevelXP: xpByLevel[i])
@@ -83,5 +92,9 @@ class Statistics: ObservableObject {
             totalXP -= xpByLevel[i]
         }
         return LevelInfo(level: xpByLevel.count + 1, currentLevelXP: 0, nextLevelXP: 0)
+    }
+    
+    func addExtraWage(_ amount: Int) {
+        extraXpWage += amount
     }
 }
