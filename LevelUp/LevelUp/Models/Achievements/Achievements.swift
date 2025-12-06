@@ -10,8 +10,9 @@ import SwiftUI
 import Combine
 
 
-class Achievement: Identifiable, ObservableObject {
-    let id = UUID()
+@Observable
+class Achievement: Identifiable {
+    let id: Int
     let title: String
     let description: String
     let goal: Int
@@ -20,10 +21,22 @@ class Achievement: Identifiable, ObservableObject {
     let wage: Int
     private let getCurrent: () -> Int
 
-    @Published
-    private(set) var achievedOn: Date? = nil
-
-    init(
+    private(set) var achievedOn: Date? = nil {
+        didSet {
+            defaults.set(achievedOn, forKey: "achievedOn_\(id)")
+        }
+    }
+    private(set) var currentScore: Int = 0 {
+        didSet {
+            defaults.set(currentScore, forKey: "currentScore_\(id)")
+        }
+    }
+    
+    @ObservationIgnored
+    private let defaults = UserDefaults.standard
+    
+    fileprivate init(
+        id: Int,
         title: String,
         description: String,
         goal: Int,
@@ -32,6 +45,7 @@ class Achievement: Identifiable, ObservableObject {
         wage: Int,
         getCurrent: @escaping () -> Int,
     ) {
+        self.id = id
         self.title = title
         self.description = description
         self.goal = goal
@@ -39,22 +53,21 @@ class Achievement: Identifiable, ObservableObject {
         self.icon = icon
         self.wage = wage
         self.getCurrent = getCurrent
+
+        if let value = defaults.object(forKey: "achievedOn_\(id)") as? Date {
+            achievedOn = value
+        }
+        currentScore = defaults.integer(forKey: "currentScore_\(id)")
     }
 
     var isCompleted: Bool {
         return achievedOn != nil
     }
     
-    @Published
-    private var _currentScore: Int = 0
-    var currentScore: Int {
-        _currentScore
-    }
-    
     func recalculate() {
         guard !isCompleted else { return }
-        _currentScore = getCurrent()
-        if _currentScore >= goal {
+        currentScore = getCurrent()
+        if currentScore >= goal {
             achievedOn = Date()
             Statistics.shared.addExtraWage(wage)
             AchievementsStorage.shared.nCompleted += 1
@@ -63,6 +76,7 @@ class Achievement: Identifiable, ObservableObject {
 }
 
 let TasksLordAch = Achievement(
+    id: 1,
     title: "Покоритель задач",
     description: "Выполните первую задачу",
     goal: 1,
@@ -73,6 +87,7 @@ let TasksLordAch = Achievement(
 )
 
 let TasksLord2Ach = Achievement(
+    id: 2,
     title: "Покоритель задач 2",
     description: "Выполните 100 задач",
     goal: 100,
@@ -83,6 +98,7 @@ let TasksLord2Ach = Achievement(
 )
 
 let TasksLord3Ach = Achievement(
+    id: 3,
     title: "Покоритель задач 3",
     description: "Выполните 1000 задач",
     goal: 1000,
@@ -94,11 +110,11 @@ let TasksLord3Ach = Achievement(
 
 
 func getCurrentLevel() -> Int {
-    @ObservedObject var stats: Statistics = .shared
-    return stats.getLevelInfo().level
+    return Statistics.shared.getLevelInfo().level
 }
 
 let LevelUpAch = Achievement(
+    id: 4,
     title: "LevelUp",
     description: "Достигните второго уровня",
     goal: 2,
@@ -109,6 +125,7 @@ let LevelUpAch = Achievement(
 )
 
 let LevelUp2Ach = Achievement(
+    id: 5,
     title: "LevelUp 2",
     description: "Достигните 10 уровня",
     goal: 10,
@@ -119,6 +136,7 @@ let LevelUp2Ach = Achievement(
 )
 
 let LevelUp3Ach = Achievement(
+    id: 6,
     title: "LevelUp 3",
     description: "Достигните 50 уровня",
     goal: 50,
@@ -129,6 +147,7 @@ let LevelUp3Ach = Achievement(
 )
 
 let ProductivemorningAch = Achievement(
+    id: 7,
     title: "Продуктивное утро",
     description: "Выполните задачу от 5:00 до 9:00 утра",
     goal: 1,
@@ -146,6 +165,7 @@ let ProductivemorningAch = Achievement(
 
 
 let HabitsIsAllWeHaveAch = Achievement(
+    id: 8,
     title: "Привычки наше все",
     description: "Внедрите первую привычку",
     goal: 1,
@@ -158,6 +178,7 @@ let HabitsIsAllWeHaveAch = Achievement(
 )
 
 let HabitsIsAllWeHave2Ach = Achievement(
+    id: 9,
     title: "Привычки наше все 2",
     description: "Внедрите 10 привычек",
     goal: 10,
@@ -170,6 +191,7 @@ let HabitsIsAllWeHave2Ach = Achievement(
 )
 
 let HabitsIsAllWeHave3Ach = Achievement(
+    id: 10,
     title: "Привычки наше все 3",
     description: "Внедрите 100 привычек",
     goal: 100,
@@ -207,6 +229,7 @@ private func countProductiveDays() -> Int {
 }
 
 let ProductiveDayAch = Achievement(
+    id: 11,
     title: "Продуктивный день",
     description: "Заработайте за день 300 xp",
     goal: 1,
@@ -217,6 +240,7 @@ let ProductiveDayAch = Achievement(
 )
 
 let ProductiveDay2Ach = Achievement(
+    id: 12,
     title: "Продуктивный день 2",
     description: "Заработайте за день 300 xp 10 раз",
     goal: 10,
@@ -227,6 +251,7 @@ let ProductiveDay2Ach = Achievement(
 )
 
 let ProductiveDay3Ach = Achievement(
+    id: 13,
     title: "Продуктивный день 3",
     description: "Заработайте за день 300 xp 100 раз",
     goal: 100,
@@ -238,6 +263,7 @@ let ProductiveDay3Ach = Achievement(
 
 
 let AlwaysCompletedAch = Achievement(
+    id: 14,
     title: "Достижение для тестирования",
     description: "Ничего не надо делать",
     goal: 0,
@@ -250,10 +276,11 @@ let AlwaysCompletedAch = Achievement(
 )
 
 
-final class AchievementsStorage: ObservableObject {
+@Observable
+final class AchievementsStorage {
     static let shared = AchievementsStorage()
 
-    @Published var achs: [Achievement] = [
+    var achs: [Achievement] = [
         TasksLordAch,
         TasksLord2Ach,
         TasksLord3Ach,
@@ -269,8 +296,7 @@ final class AchievementsStorage: ObservableObject {
         ProductiveDay3Ach,
     ]
     
-    @Published
-    fileprivate(set) var nCompleted = 0
+    fileprivate(set) var nCompleted: Int = 0
 
     private init() {
     #if DEBUG

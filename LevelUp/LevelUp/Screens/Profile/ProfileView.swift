@@ -11,8 +11,7 @@ import SwiftUI
 struct ProfileView: View {
     let maxProfileWidth: CGFloat = 200;
     
-    @ObservedObject var stats: Statistics = .shared
-    @ObservedObject var achievements = AchievementsStorage.shared
+    @State var viewModel = ProfileViewModel()
     
     var body: some View {
         ZStack {
@@ -29,11 +28,11 @@ struct ProfileView: View {
                         maxHeight: maxProfileWidth)
                     .clipShape(Circle())
                 
-                let info = stats.getLevelInfo()
+                let info = viewModel.getLevelInfo()
                 ProgressBarView(current: info.currentLevelXP, maximum: info.nextLevelXP, level: info.level)
                     .padding(.bottom, 8)
                 
-                Text("Выполненно \(achievements.nCompleted) из \(achievements.achs.count) достижений")
+                Text("Выполненно \(viewModel.nCurrentAchs) из \(viewModel.nTotalAchs) достижений")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)

@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct AchievementView: View {
-    @ObservedObject
     var achievement: Achievement
 
     var body: some View {

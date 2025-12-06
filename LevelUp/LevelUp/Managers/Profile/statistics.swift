@@ -17,50 +17,40 @@ struct Point: Codable {
     let value: Int
 }
 
-// Source - https://stackoverflow.com/a
-// Posted by pawello2222
-// Retrieved 2025-11-27, License - CC BY-SA 4.0
 
-extension Array: @retroactive RawRepresentable where Element: Codable {
-    public init?(rawValue: String) {
-        guard let data = rawValue.data(using: .utf8),
-              let result = try? JSONDecoder().decode([Element].self, from: data)
-        else {
-            return nil
-        }
-        self = result
-    }
-
-    public var rawValue: String {
-        guard let data = try? JSONEncoder().encode(self),
-              let result = String(data: data, encoding: .utf8)
-        else {
-            return "[]"
-        }
-        return result
-    }
+struct LevelInfo {
+    let level: Int
+    let currentLevelXP: Int
+    let nextLevelXP: Int
 }
 
-class Statistics: ObservableObject {
-    @AppStorage("xpPoints") var storedXpPoints: [Point] = []
-    @Published var xpPoints: [Point] = [] {
+@Observable
+class Statistics {
+    @ObservationIgnored
+    let defaults = UserDefaults.standard
+    
+    var xpPoints: [Point] = [] {
         didSet {
-            storedXpPoints = xpPoints
+            if let data = try? JSONEncoder().encode(xpPoints) {
+                defaults.set(data, forKey: "xpPoints")
+            }
         }
     }
     
-    @AppStorage("extraXpWage") var storedExtraXpWage: Int = 0
-    @Published var extraXpWage: Int = 0 {
+    var extraXpWage: Int = 0 {
         didSet {
-            storedExtraXpWage = extraXpWage
+            defaults.set(extraXpWage, forKey: "extraXpWage")
         }
     }
-
     
     static let shared = Statistics()
     
     private init() {
-        xpPoints = storedXpPoints
+        if let data = defaults.object(forKey: "xpPoints") as? Data {
+            xpPoints = (try? JSONDecoder().decode([Point].self, from: data)) ?? []
+        }
+        
+        extraXpWage = defaults.integer(forKey: "extraXpWage")
     }
     
     func addXPPoint(point: Point) {
@@ -68,19 +58,12 @@ class Statistics: ObservableObject {
     }
     
     func delXPPoint(point: Point) {
-        let idx = xpPoints.lastIndex { idx in idx.id == point.id }
-        if let safeIdx = idx {
-            xpPoints.remove(at: safeIdx)
+        if let idx = xpPoints.lastIndex(where: { idx in idx.id == point.id }) {
+            xpPoints.remove(at: idx)
         }
     }
     
     let xpByLevel = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    
-    struct LevelInfo {
-        let level: Int
-        let currentLevelXP: Int
-        let nextLevelXP: Int
-    }
     
     func getLevelInfo() -> LevelInfo {
         var totalXP = xpPoints.reduce(0) { a, b in a + b.value }
