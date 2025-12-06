@@ -37,7 +37,7 @@ struct ProfileView: View {
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
 
-                LazyVGrid(columns: [GridItem(.flexible())]) {
+                VStack {
                     ForEach(AchievementsStorage.shared.achs) { achievement in
                         AchievementView(achievement: achievement)
                         Divider()
