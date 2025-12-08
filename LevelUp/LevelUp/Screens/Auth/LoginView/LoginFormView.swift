@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LoginFormView: View {
     @ObservedObject var viewModel: LoginViewModel
+    let onSuccess: () -> Void
     
     var body: some View {
         VStack(spacing: UIConstants.Spacing.medium) {
@@ -27,12 +28,14 @@ struct LoginFormView: View {
             
             FormButton(title: "Войти") {
                 viewModel.login()
+                if viewModel.isFormValid {
+                    onSuccess()
+                }
             }
         }
     }
 }
 
 #Preview {
-    LoginFormView(viewModel: LoginViewModel())
+    LoginFormView(viewModel: LoginViewModel(), onSuccess: {})
 }
-

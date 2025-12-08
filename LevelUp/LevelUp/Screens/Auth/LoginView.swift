@@ -9,11 +9,15 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
+    @EnvironmentObject private var sessionManager: SessionManager
     
     var body: some View {
         AuthScreenContainer {
             LoginHeaderView()
-            LoginFormView(viewModel: viewModel)
+            LoginFormView(
+                viewModel: viewModel,
+                onSuccess: { sessionManager.signIn() }
+            )
             AuthFooterView(
                 questionText: "Все еще нет аккаунта?",
                 linkText: "Зарегистрироваться"
@@ -28,5 +32,5 @@ struct LoginView: View {
     NavigationStack {
         LoginView()
     }
+    .environmentObject(SessionManager())
 }
-

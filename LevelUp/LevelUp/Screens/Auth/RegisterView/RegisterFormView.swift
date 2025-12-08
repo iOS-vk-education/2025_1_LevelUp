@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RegisterFormView: View {
     @ObservedObject var viewModel: RegisterViewModel
+    let onSuccess: () -> Void
     
     var body: some View {
         VStack(spacing: UIConstants.Spacing.medium) {
@@ -40,12 +41,14 @@ struct RegisterFormView: View {
             
             FormButton(title: "Создать аккаунт") {
                 viewModel.register()
+                if viewModel.isFormValid {
+                    onSuccess()
+                }
             }
         }
     }
 }
 
 #Preview {
-    RegisterFormView(viewModel: RegisterViewModel())
+    RegisterFormView(viewModel: RegisterViewModel(), onSuccess: {})
 }
-
