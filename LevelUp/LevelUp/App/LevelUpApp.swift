@@ -3,6 +3,14 @@ import SwiftData
 
 @main
 struct LevelUpApp: App {
+    @StateObject private var sessionManager = SessionManager()
+
+    init() {
+        #if DEBUG
+        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+        #endif
+    }
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -18,7 +26,8 @@ struct LevelUpApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environmentObject(sessionManager)
         }
         .modelContainer(sharedModelContainer)
     }

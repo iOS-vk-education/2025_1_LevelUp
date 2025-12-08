@@ -55,7 +55,10 @@ struct HabitsView: View {
                 HabitRowView(
                     habit: habit,
                     isDone: viewModel.isHabitDone(habit, on: viewModel.selectedDate),
-                    onToggle: { viewModel.toggleHabit(habit, on: viewModel.selectedDate) },
+                    onToggle: {
+                        viewModel.toggleHabit(habit, on: viewModel.selectedDate)
+                        CompletedHabits.shared.add()
+                    },
                     onEdit: { viewModel.startEditing(habit, selectedDay: viewModel.selectedDate) },
                     onDelete: { scope in viewModel.deleteHabit(habit, scope: scope, on: viewModel.selectedDate) }
                 )
