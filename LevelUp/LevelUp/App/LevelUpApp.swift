@@ -3,6 +3,7 @@ import SwiftData
 
 @main
 struct LevelUpApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
