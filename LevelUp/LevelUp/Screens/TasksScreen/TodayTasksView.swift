@@ -151,27 +151,29 @@ struct SwipeActionRow<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .trailing) {
-
             if showActions {
                 HStack(spacing: 12) {
-                    Button(action: onDelete) {
-                        Image(systemName: "trash")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 36, height: 36)
-                            .background(Circle().fill(Color.red.opacity(0.9)))
-                    }
-
-                    Button(action: onEdit) {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 36, height: 36)
-                            .background(Circle().fill(Color.orange.opacity(0.9)))
-                    }
+                    LiquidGlassCircleButton(
+                        systemImage: "trash",
+                        tint: .red,
+                        buttonSize: 40,
+                        iconSize: 18,
+                        useMaterial: false,
+                        action: onDelete,
+                        imageShadow: 0
+                    )
+                    LiquidGlassCircleButton(
+                        systemImage: "pencil",
+                        tint: .orange,
+                        buttonSize: 40,
+                        iconSize: 18,
+                        useMaterial: false,
+                        action: onEdit,
+                        imageShadow: 0
+                    )
                 }
                 .padding(.trailing, 6)
-                .transition(.opacity) // мягко, но без вспышек
+                .transition(.opacity)
             }
 
             content
@@ -393,7 +395,7 @@ struct TodayTasksView: View {
             
             
             if !isAddingTask {
-                LiquidGlassCircleButton(systemImage: "plus", tint: myBlue, buttonSize: 72, iconSize: 26) {
+                LiquidGlassCircleButton(systemImage: "plus", tint: myBlue, buttonSize: 72, iconSize: 26, imageShadow: 0.25) {
                     withAnimation {
                         isAddingTask = true
                     }
@@ -401,6 +403,8 @@ struct TodayTasksView: View {
                         isTaskFieldFocused = true
                     }
                 }
+                .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
+                .shadow(color: Color.white.opacity(0.4), radius: 8, x: 0, y: -3)
                 .padding(.trailing, 26)
                 .padding(.bottom, 40)
             }
@@ -429,13 +433,16 @@ struct TodayTasksView: View {
                             systemImage: "arrow.up",
                             tint: myBlue,
                             buttonSize: 36,
-                            iconSize: 20
+                            iconSize: 20,
+                            imageShadow: 0.25
                     ) {
                         addTask()
                     }
                     
                     
                 }
+                .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
+                .shadow(color: Color.white.opacity(0.4), radius: 8, x: 0, y: -3)
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
                 .padding(.bottom, 8)

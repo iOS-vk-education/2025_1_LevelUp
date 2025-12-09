@@ -100,6 +100,8 @@ struct HabitsView: View {
             iconSize: 26,
             action: { viewModel.beginCreate(on: viewModel.selectedDate) }
         )
+        .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
+        .shadow(color: Color.white.opacity(0.4), radius: 8, x: 0, y: -3)
         .accessibilityLabel("Add habit")
     }
 
