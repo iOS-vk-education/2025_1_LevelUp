@@ -290,6 +290,7 @@ struct TodayTasksView: View {
     @FocusState private var isTaskFieldFocused: Bool
     @State private var editingTask: Task? = nil
     @State private var editingTitle: String = ""
+    @State private var isXPInfoPresented: Bool = false
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
     private let xpPerTask = 100
     
@@ -308,6 +309,10 @@ struct TodayTasksView: View {
                             earnedXP: earnedXP,
                             targetXP: targetXP
                         )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            isXPInfoPresented = true
+                        }
                         WeekStripView(
                             weekDays: habitsViewModel.weekDays,
                             selectedDate: habitsViewModel.selectedDate,
@@ -387,6 +392,9 @@ struct TodayTasksView: View {
             }
             .sheet(item: $editingTask) { task in
                 TaskEditSheet(task: task, viewModel: viewModel)
+            }
+            .sheet(isPresented: $isXPInfoPresented) {
+                XPInfoView(earnedXP: earnedXP)
             }
             
             
@@ -494,4 +502,27 @@ struct TodayTasksView: View {
     TodayTasksView()
         .environmentObject(HabitViewModel())
         .environmentObject(TodayTasksViewModel())
+}
+
+struct XPInfoView: View {
+    let earnedXP: Int
+
+    var body: some View {
+        ZStack {
+            Color(red: 0.30, green: 0.60, blue: 0.98)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Text("Копи опыт и получай XP")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("Текущее XP за сегодня: \(earnedXP)")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+            .multilineTextAlignment(.center)
+            .padding(24)
+        }
+    }
 }
