@@ -17,7 +17,9 @@ struct HeaderView: View {
 }
 
 struct ExperienceSectionView: View {
-    let progress: Double = 0.6
+    let progress: Double
+    let earnedXP: Int
+    let targetXP: Int
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Твой опыт за сегодня")
@@ -25,6 +27,9 @@ struct ExperienceSectionView: View {
                 .font(.system(size: 18, weight: .medium))
             AppProgressView(progress: progress)
                 .frame(height: 14)
+            Text("\(earnedXP) / \(targetXP) XP")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 }
@@ -265,6 +270,7 @@ struct TodayTasksView: View {
     @State private var editingTask: Task? = nil
     @State private var editingTitle: String = ""
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
+    private let xpPerTask = 100
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -288,7 +294,11 @@ struct TodayTasksView: View {
                                 viewModel.selectedDate = habitsViewModel.selectedDate
                             }
                         )
-                        ExperienceSectionView()
+                        ExperienceSectionView(
+                            progress: todayXPProgress,
+                            earnedXP: earnedXP,
+                            targetXP: targetXP
+                        )
                         
                         // Карточка "Сделать"
                         TasksCardView(
@@ -458,6 +468,23 @@ struct TodayTasksView: View {
     private func startEdit(_ task: Task) {
         editingTitle = task.title
         editingTask = task
+    }
+
+    private var totalTasksCount: Int {
+        viewModel.todayTasks.count + viewModel.doneTasks.count
+    }
+
+    private var earnedXP: Int {
+        viewModel.doneTasks.count * xpPerTask
+    }
+
+    private var targetXP: Int {
+        max(totalTasksCount * xpPerTask, xpPerTask)
+    }
+
+    private var todayXPProgress: Double {
+        guard targetXP > 0 else { return 0 }
+        return min(Double(earnedXP) / Double(targetXP), 1)
     }
 }
 #Preview {

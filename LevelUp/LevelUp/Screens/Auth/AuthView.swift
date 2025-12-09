@@ -9,11 +9,15 @@ import SwiftUI
 
 struct AuthView: View {
     var body: some View {
-        VStack(spacing: UIConstants.Spacing.medium) {
-            AuthHeaderView()
-            AuthButtonsView()
+        ZStack {
+            GradientBackground()
+                .ignoresSafeArea()
+
+            VStack(spacing: UIConstants.Spacing.medium) {
+                AuthHeaderView()
+                AuthButtonsView()
+            }
         }
-        .background(GradientBackground())
     }
 }
 
