@@ -367,30 +367,7 @@ struct TodayTasksView: View {
                 }
             }
             .sheet(item: $editingTask) { task in
-                NavigationStack {
-                    VStack(spacing: 16) {
-                        TextField("Название задачи", text: $editingTitle)
-                            .textFieldStyle(.roundedBorder)
-                            .padding()
-
-                        Spacer()
-                    }
-                    .navigationTitle("Редактировать")
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Отмена") { editingTask = nil }
-                        }
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Сохранить") {
-                                let trimmed = editingTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-                                if !trimmed.isEmpty {
-                                    viewModel.updateTask(task, newTitle: trimmed)
-                                }
-                                editingTask = nil
-                            }
-                        }
-                    }
-                }
+                TaskEditSheet(task: task, viewModel: viewModel)
             }
             
             

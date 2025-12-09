@@ -71,8 +71,10 @@ final class TodayTasksViewModel: ObservableObject {
         allTasks.remove(at: index)
     }
 
-    func updateTask(_ task: Task, newTitle: String) {
+    func updateTask(_ task: Task, newTitle: String, newDescription: String, newTag: TaskTag) {
         guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
         allTasks[index].title = newTitle
+        allTasks[index].description = newDescription
+        allTasks[index].tag = newTag
     }
 }
