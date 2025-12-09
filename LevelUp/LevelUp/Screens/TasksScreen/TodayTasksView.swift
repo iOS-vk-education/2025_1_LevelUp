@@ -46,7 +46,7 @@ struct TaskRowView: View {
             
             Spacer()
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 10)
     }
 }
 
@@ -119,19 +119,100 @@ struct HabitCheckboxRow: View {
     }
 }
 
+struct SwipeActionRow<Content: View>: View {
+    private let content: Content
+    private let onDelete: () -> Void
+    private let onEdit: () -> Void
+
+    private let actionWidth: CGFloat = 120
+
+    @State private var offset: CGFloat = 0
+    @State private var isOpen: Bool = false
+
+    init(
+        onDelete: @escaping () -> Void,
+        onEdit: @escaping () -> Void,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.onDelete = onDelete
+        self.onEdit = onEdit
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack(alignment: .trailing) {
+
+            // Кнопки под строкой
+            HStack(spacing: 12) {
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(Color.red.opacity(0.9)))
+                }
+
+                Button(action: onEdit) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(Color.orange.opacity(0.9)))
+                }
+            }
+            .padding(.trailing, 6)
+
+            // Контент сверху
+            content
+                .frame(maxWidth: .infinity, alignment: .leading) // ✅ ключ
+                .background(Color.white)                          // ✅ ключ
+                .contentShape(Rectangle())
+                .offset(x: offset)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            let t = value.translation.width
+                            if t < 0 {
+                                offset = max(t, -actionWidth)
+                            } else {
+                                offset = isOpen ? min(t - actionWidth, 0) : 0
+                            }
+                        }
+                        .onEnded { value in
+                            let shouldOpen = (-value.translation.width) > actionWidth * 0.4
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                                offset = shouldOpen ? -actionWidth : 0
+                                isOpen = shouldOpen
+                            }
+                        }
+                )
+                .onTapGesture {
+                    if isOpen {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                            offset = 0
+                            isOpen = false
+                        }
+                    }
+                }
+        }
+    }
+}
+
 struct TasksCardView: View {
     let title: String
     let tasks: [Task]
     let emptyText: String
     let toggleTask: (Task) -> Void
-    
+    let deleteTask: (Task) -> Void
+    let editTask: (Task) -> Void
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(title)
                 .font(.system(size: 20, weight: .semibold))
-            
+
             Divider()
-            
+
             if tasks.isEmpty {
                 Text(emptyText)
                     .font(.subheadline)
@@ -140,13 +221,17 @@ struct TasksCardView: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(tasks) { task in
-                        TaskRowView(task: task) {
-                            toggleTask(task)
+                        SwipeActionRow(
+                            onDelete: { deleteTask(task) },
+                            onEdit: { editTask(task) }
+                        ) {
+                            TaskRowView(task: task) {
+                                toggleTask(task)
+                            }
                         }
                     }
                 }
             }
-            
         }
         .padding(20)
         .background(
@@ -155,6 +240,8 @@ struct TasksCardView: View {
                 .shadow(color: Color.black.opacity(0.08),
                         radius: 8, x: 0, y: 4)
         )
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .contentShape(RoundedRectangle(cornerRadius: 24))
     }
 }
 
@@ -164,6 +251,8 @@ struct TodayTasksView: View {
     @State private var newTaskTitle: String = ""
     @State private var isAddingTask: Bool = false
     @FocusState private var isTaskFieldFocused: Bool
+    @State private var editingTask: Task? = nil
+    @State private var editingTitle: String = ""
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
     
     var body: some View {
@@ -199,6 +288,14 @@ struct TodayTasksView: View {
                                 withAnimation(.easeInOut(duration: 0.2)) {
                                     viewModel.toggleCompletion(for: task)
                                 }
+                            },
+                            deleteTask: { task in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.deleteTask(task)
+                                }
+                            },
+                            editTask: { task in
+                                startEdit(task)
                             }
                         )
                         
@@ -211,6 +308,14 @@ struct TodayTasksView: View {
                                 withAnimation(.easeInOut(duration: 0.2)) {
                                     viewModel.toggleCompletion(for: task)
                                 }
+                            },
+                            deleteTask: { task in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.deleteTask(task)
+                                }
+                            },
+                            editTask: { task in
+                                startEdit(task)
                             }
                         )
 
@@ -238,6 +343,33 @@ struct TodayTasksView: View {
                     viewModel.selectedDate = newDate
                 }
             }
+            .sheet(item: $editingTask) { task in
+                NavigationStack {
+                    VStack(spacing: 16) {
+                        TextField("Название задачи", text: $editingTitle)
+                            .textFieldStyle(.roundedBorder)
+                            .padding()
+
+                        Spacer()
+                    }
+                    .navigationTitle("Редактировать")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Отмена") { editingTask = nil }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Сохранить") {
+                                let trimmed = editingTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if !trimmed.isEmpty {
+                                    viewModel.updateTask(task, newTitle: trimmed)
+                                }
+                                editingTask = nil
+                            }
+                        }
+                    }
+                }
+            }
+            
             
             if !isAddingTask {
                 LiquidGlassCircleButton(systemImage: "plus", tint: myBlue, buttonSize: 72, iconSize: 26) {
@@ -310,6 +442,11 @@ struct TodayTasksView: View {
 
     private var todayDate: Date {
         viewModel.selectedDate
+    }
+    
+    private func startEdit(_ task: Task) {
+        editingTitle = task.title
+        editingTask = task
     }
 }
 #Preview {
