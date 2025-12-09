@@ -128,6 +128,7 @@ struct SwipeActionRow<Content: View>: View {
 
     @State private var offset: CGFloat = 0
     @State private var isOpen: Bool = false
+    @State private var isDragging: Bool = false
 
     init(
         onDelete: @escaping () -> Void,
@@ -139,38 +140,45 @@ struct SwipeActionRow<Content: View>: View {
         self.content = content()
     }
 
+    private var showActions: Bool {
+        isOpen || isDragging || offset < -1
+    }
+
     var body: some View {
         ZStack(alignment: .trailing) {
 
-            // Кнопки под строкой
-            HStack(spacing: 12) {
-                Button(action: onDelete) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(Color.red.opacity(0.9)))
-                }
+            if showActions {
+                HStack(spacing: 12) {
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(Color.red.opacity(0.9)))
+                    }
 
-                Button(action: onEdit) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(Color.orange.opacity(0.9)))
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(Color.orange.opacity(0.9)))
+                    }
                 }
+                .padding(.trailing, 6)
+                .transition(.opacity) // мягко, но без вспышек
             }
-            .padding(.trailing, 6)
 
-            // Контент сверху
             content
-                .frame(maxWidth: .infinity, alignment: .leading) // ✅ ключ
-                .background(Color.white)                          // ✅ ключ
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white)
                 .contentShape(Rectangle())
                 .offset(x: offset)
                 .gesture(
                     DragGesture()
                         .onChanged { value in
+                            isDragging = true
+
                             let t = value.translation.width
                             if t < 0 {
                                 offset = max(t, -actionWidth)
@@ -179,6 +187,8 @@ struct SwipeActionRow<Content: View>: View {
                             }
                         }
                         .onEnded { value in
+                            isDragging = false
+
                             let shouldOpen = (-value.translation.width) > actionWidth * 0.4
                             withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
                                 offset = shouldOpen ? -actionWidth : 0
@@ -195,6 +205,7 @@ struct SwipeActionRow<Content: View>: View {
                     }
                 }
         }
+        .clipped()
     }
 }
 
