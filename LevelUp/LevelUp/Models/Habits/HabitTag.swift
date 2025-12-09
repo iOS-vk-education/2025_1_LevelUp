@@ -1,7 +1,6 @@
-//
 import SwiftUI
 
-enum TaskTag: String, CaseIterable {
+enum HabitTag: String, CaseIterable {
     case primary
     case secondary
     case light
@@ -23,11 +22,3 @@ enum TaskTag: String, CaseIterable {
     }
 }
 
-struct Task: Identifiable, Equatable {
-    let id: UUID = UUID()
-    var title: String
-    var description: String = ""
-    var isCompleted: Bool = false
-    var date: Date = Date()
-    var tag: TaskTag? = nil
-}

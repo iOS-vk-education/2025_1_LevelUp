@@ -50,6 +50,18 @@ struct TaskRowView: View {
                 .foregroundColor(task.isCompleted ? .secondary : .primary)
             
             Spacer()
+
+            if let tag = task.tag {
+                Text(tag.title)
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(tag.color.opacity(0.15))
+                    )
+                    .foregroundStyle(tag.color)
+            }
         }
         .padding(.vertical, 10)
     }

@@ -5,7 +5,7 @@ struct TaskEditSheet: View {
     @ObservedObject var viewModel: TodayTasksViewModel
     @State private var title: String
     @State private var description: String
-    @State private var tag: TaskTag
+    @State private var tag: TaskTag?
     @FocusState private var isTitleFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
@@ -67,6 +67,25 @@ struct TaskEditSheet: View {
 
     private var tagPicker: some View {
         HStack(spacing: 8) {
+            Button {
+                tag = nil
+            } label: {
+                Text("Без тега")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(tag == nil ? Color(.secondarySystemBackground) : Color.clear)
+                    )
+                    .foregroundStyle(.primary)
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .stroke(tag == nil ? Color.gray.opacity(0.4) : .clear, lineWidth: 1)
+                    )
+            }
+            .buttonStyle(.plain)
+
             ForEach(TaskTag.allCases, id: \.self) { option in
                 let isSelected = tag == option
                 Button {
