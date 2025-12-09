@@ -17,7 +17,9 @@ struct HeaderView: View {
 }
 
 struct ExperienceSectionView: View {
-    let progress: Double = 0.6
+    let progress: Double
+    let earnedXP: Int
+    let targetXP: Int
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Твой опыт за сегодня")
@@ -25,6 +27,9 @@ struct ExperienceSectionView: View {
                 .font(.system(size: 18, weight: .medium))
             AppProgressView(progress: progress)
                 .frame(height: 14)
+            Text("\(earnedXP) / \(targetXP) XP")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 }
@@ -128,6 +133,7 @@ struct SwipeActionRow<Content: View>: View {
 
     @State private var offset: CGFloat = 0
     @State private var isOpen: Bool = false
+    @State private var isDragging: Bool = false
 
     init(
         onDelete: @escaping () -> Void,
@@ -139,38 +145,45 @@ struct SwipeActionRow<Content: View>: View {
         self.content = content()
     }
 
+    private var showActions: Bool {
+        isOpen || isDragging || offset < -1
+    }
+
     var body: some View {
         ZStack(alignment: .trailing) {
 
-            // Кнопки под строкой
-            HStack(spacing: 12) {
-                Button(action: onDelete) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(Color.red.opacity(0.9)))
-                }
+            if showActions {
+                HStack(spacing: 12) {
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(Color.red.opacity(0.9)))
+                    }
 
-                Button(action: onEdit) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(Color.orange.opacity(0.9)))
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(Color.orange.opacity(0.9)))
+                    }
                 }
+                .padding(.trailing, 6)
+                .transition(.opacity) // мягко, но без вспышек
             }
-            .padding(.trailing, 6)
 
-            // Контент сверху
             content
-                .frame(maxWidth: .infinity, alignment: .leading) // ✅ ключ
-                .background(Color.white)                          // ✅ ключ
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white)
                 .contentShape(Rectangle())
                 .offset(x: offset)
                 .gesture(
                     DragGesture()
                         .onChanged { value in
+                            isDragging = true
+
                             let t = value.translation.width
                             if t < 0 {
                                 offset = max(t, -actionWidth)
@@ -179,6 +192,8 @@ struct SwipeActionRow<Content: View>: View {
                             }
                         }
                         .onEnded { value in
+                            isDragging = false
+
                             let shouldOpen = (-value.translation.width) > actionWidth * 0.4
                             withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
                                 offset = shouldOpen ? -actionWidth : 0
@@ -195,6 +210,7 @@ struct SwipeActionRow<Content: View>: View {
                     }
                 }
         }
+        .clipped()
     }
 }
 
@@ -254,6 +270,7 @@ struct TodayTasksView: View {
     @State private var editingTask: Task? = nil
     @State private var editingTitle: String = ""
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
+    private let xpPerTask = 100
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -277,7 +294,11 @@ struct TodayTasksView: View {
                                 viewModel.selectedDate = habitsViewModel.selectedDate
                             }
                         )
-                        ExperienceSectionView()
+                        ExperienceSectionView(
+                            progress: todayXPProgress,
+                            earnedXP: earnedXP,
+                            targetXP: targetXP
+                        )
                         
                         // Карточка "Сделать"
                         TasksCardView(
@@ -447,6 +468,23 @@ struct TodayTasksView: View {
     private func startEdit(_ task: Task) {
         editingTitle = task.title
         editingTask = task
+    }
+
+    private var totalTasksCount: Int {
+        viewModel.todayTasks.count + viewModel.doneTasks.count
+    }
+
+    private var earnedXP: Int {
+        viewModel.doneTasks.count * xpPerTask
+    }
+
+    private var targetXP: Int {
+        max(totalTasksCount * xpPerTask, xpPerTask)
+    }
+
+    private var todayXPProgress: Double {
+        guard targetXP > 0 else { return 0 }
+        return min(Double(earnedXP) / Double(targetXP), 1)
     }
 }
 #Preview {
