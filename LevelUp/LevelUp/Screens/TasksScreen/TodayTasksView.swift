@@ -12,18 +12,20 @@ struct HeaderView: View {
         Text("Сегодня")
             .font(.system(size: 32, weight: .bold))
             .frame(maxWidth: .infinity, alignment: .center)
+            .foregroundStyle(.primary)
     }
 }
 
 struct ExperienceSectionView: View {
     let progress: Double = 0.6
     var body: some View {
-        Text("Твой опыт за сегодня")
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .font(.system(size: 18, weight: .medium))
-        ProgressView(value: progress)
-            .tint(.blue)
-            
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Твой опыт за сегодня")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(.system(size: 18, weight: .medium))
+            AppProgressView(progress: progress)
+                .frame(height: 14)
+        }
     }
 }
 
@@ -166,19 +168,28 @@ struct TodayTasksView: View {
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-//            Color
-//                .blue
-//          Как добавить кастомный задний фон???
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+
             NavigationStack {
-                VStack(spacing: 16) {
-                    HeaderView()
-                    ExperienceSectionView()
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-                
                 ScrollView {
-                    VStack(spacing: 16) {
+                    
+                    VStack(spacing: 20) {
+                        HeaderView()
+                        WeekStripView(
+                            weekDays: habitsViewModel.weekDays,
+                            selectedDate: habitsViewModel.selectedDate,
+                            onSelectDay: { date in
+                                habitsViewModel.selectDate(date)
+                                viewModel.selectedDate = habitsViewModel.selectedDate
+                            },
+                            onShiftWeek: { offset in
+                                habitsViewModel.shiftWeek(by: offset)
+                                viewModel.selectedDate = habitsViewModel.selectedDate
+                            }
+                        )
+                        ExperienceSectionView()
+                        
                         // Карточка "Сделать"
                         TasksCardView(
                             title: "Сделать",
@@ -217,8 +228,15 @@ struct TodayTasksView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 32)
                 }
-                .navigationBarHidden(true)
+                .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
+                .background(Color(.systemGroupedBackground))
+                .onAppear {
+                    viewModel.selectedDate = habitsViewModel.selectedDate
+                }
+                .onChange(of: habitsViewModel.selectedDate) { newDate in
+                    viewModel.selectedDate = newDate
+                }
             }
             
             if !isAddingTask {
@@ -243,6 +261,11 @@ struct TodayTasksView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 18)
                                 .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color(myBlue).opacity(0.2), lineWidth: 1)
                         )
                         .font(.system(size: 16))
                         .submitLabel(.done)
@@ -272,7 +295,7 @@ struct TodayTasksView: View {
         let trimmed = newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        viewModel.addTask(title: trimmed)
+        viewModel.addTask(title: trimmed, date: todayDate)
         newTaskTitle = ""
 
         withAnimation {
@@ -286,7 +309,7 @@ struct TodayTasksView: View {
     }
 
     private var todayDate: Date {
-        Calendar.current.startOfDay(for: Date())
+        viewModel.selectedDate
     }
 }
 #Preview {

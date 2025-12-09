@@ -13,11 +13,11 @@ struct ContentView: View {
         TabView {
             TodayTasksView()
                 .tabItem {
-                    Label("Задачи", systemImage: "target")
+                    Label("Задачи", systemImage: "checklist")
                 }
             HabitsView()
                 .tabItem {
-                    Label("Привычки", systemImage: "leaf.circle.fill")
+                    Label("Привычки", systemImage: "list.clipboard.fill")
                 }
             ProfileView()
                 .tabItem {

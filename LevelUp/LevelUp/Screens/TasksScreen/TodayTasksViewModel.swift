@@ -55,8 +55,8 @@ final class TodayTasksViewModel: ObservableObject {
         }
     }
     
-    func addTask(title: String) {
-        let newTask = Task(title: title)
+    func addTask(title: String, date: Date) {
+        let newTask = Task(title: title, date: date)
         allTasks.append(newTask)
     }
 }
