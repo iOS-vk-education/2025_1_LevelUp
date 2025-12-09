@@ -37,6 +37,7 @@ struct ExperienceSectionView: View {
 struct TaskRowView: View {
     let task: Task
     let toggle: () -> Void
+    let onEdit: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
@@ -64,6 +65,10 @@ struct TaskRowView: View {
             }
         }
         .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onEdit()
+        }
     }
 }
 
@@ -255,9 +260,11 @@ struct TasksCardView: View {
                             onDelete: { deleteTask(task) },
                             onEdit: { editTask(task) }
                         ) {
-                            TaskRowView(task: task) {
-                                toggleTask(task)
-                            }
+                            TaskRowView(
+                                task: task,
+                                toggle: { toggleTask(task) },
+                                onEdit: { editTask(task) }
+                            )
                         }
                     }
                 }
