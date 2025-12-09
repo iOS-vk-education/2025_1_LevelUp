@@ -3,8 +3,10 @@ import SwiftUI
 struct HabitsView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var viewModel: HabitViewModel
+    @EnvironmentObject private var tasksViewModel: TodayTasksViewModel
     @FocusState private var isTitleFieldFocused: Bool
     private let habitAccent = Color(red: 0.30, green: 0.60, blue: 0.98)
+    private let xpPerTask = 100
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -14,11 +16,22 @@ struct HabitsView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 20) {
                     header
+                    ExperienceSectionView(
+                        progress: todayXPProgress,
+                        earnedXP: earnedXP,
+                        targetXP: targetXP
+                    )
                     WeekStripView(
                         weekDays: viewModel.weekDays,
                         selectedDate: viewModel.selectedDate,
-                        onSelectDay: viewModel.selectDate,
-                        onShiftWeek: viewModel.shiftWeek
+                        onSelectDay: { date in
+                            viewModel.selectDate(date)
+                            tasksViewModel.selectedDate = viewModel.selectedDate
+                        },
+                        onShiftWeek: { offset in
+                            viewModel.shiftWeek(by: offset)
+                            tasksViewModel.selectedDate = viewModel.selectedDate
+                        }
                     )
                     habitCard
                     Spacer(minLength: 40)
@@ -39,6 +52,12 @@ struct HabitsView: View {
                 selectedDate: viewModel.selectedDate,
                 isTitleFieldFocused: _isTitleFieldFocused
             )
+        }
+        .onAppear {
+            tasksViewModel.selectedDate = viewModel.selectedDate
+        }
+        .onChange(of: viewModel.selectedDate) { newDate in
+            tasksViewModel.selectedDate = newDate
         }
     }
 
@@ -87,9 +106,27 @@ struct HabitsView: View {
     private var horizontalPadding: CGFloat {
         horizontalSizeClass == .compact ? 16 : 24
     }
+
+    private var totalTasksCount: Int {
+        tasksViewModel.todayTasks.count + tasksViewModel.doneTasks.count
+    }
+
+    private var earnedXP: Int {
+        tasksViewModel.doneTasks.count * xpPerTask
+    }
+
+    private var targetXP: Int {
+        max(totalTasksCount * xpPerTask, xpPerTask)
+    }
+
+    private var todayXPProgress: Double {
+        guard targetXP > 0 else { return 0 }
+        return min(Double(earnedXP) / Double(targetXP), 1)
+    }
 }
 
 #Preview {
     HabitsView()
         .environmentObject(HabitViewModel())
+        .environmentObject(TodayTasksViewModel())
 }

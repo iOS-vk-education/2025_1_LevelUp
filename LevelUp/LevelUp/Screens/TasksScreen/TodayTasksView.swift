@@ -262,7 +262,7 @@ struct TasksCardView: View {
 }
 
 struct TodayTasksView: View {
-    @StateObject private var viewModel = TodayTasksViewModel()
+    @EnvironmentObject private var viewModel: TodayTasksViewModel
     @EnvironmentObject private var habitsViewModel: HabitViewModel
     @State private var newTaskTitle: String = ""
     @State private var isAddingTask: Bool = false
@@ -282,6 +282,11 @@ struct TodayTasksView: View {
                     
                     VStack(spacing: 20) {
                         HeaderView()
+                        ExperienceSectionView(
+                            progress: todayXPProgress,
+                            earnedXP: earnedXP,
+                            targetXP: targetXP
+                        )
                         WeekStripView(
                             weekDays: habitsViewModel.weekDays,
                             selectedDate: habitsViewModel.selectedDate,
@@ -293,11 +298,6 @@ struct TodayTasksView: View {
                                 habitsViewModel.shiftWeek(by: offset)
                                 viewModel.selectedDate = habitsViewModel.selectedDate
                             }
-                        )
-                        ExperienceSectionView(
-                            progress: todayXPProgress,
-                            earnedXP: earnedXP,
-                            targetXP: targetXP
                         )
                         
                         // Карточка "Сделать"
@@ -490,4 +490,5 @@ struct TodayTasksView: View {
 #Preview {
     TodayTasksView()
         .environmentObject(HabitViewModel())
+        .environmentObject(TodayTasksViewModel())
 }
