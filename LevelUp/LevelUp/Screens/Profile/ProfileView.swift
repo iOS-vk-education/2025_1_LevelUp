@@ -7,9 +7,8 @@
 
 import SwiftUI
 
-
 struct ProfileView: View {
-    let maxProfileWidth: CGFloat = 200;
+    let maxProfileWidth: CGFloat = 280
     
     @State var viewModel = ProfileViewModel()
     
@@ -22,12 +21,11 @@ struct ProfileView: View {
                 VStack(spacing: 20) {
                     header
                     
-                    Image("Profile")
+                    Image("profile_pic")
                         .resizable()
                         .frame(
                             maxWidth: maxProfileWidth,
                             maxHeight: maxProfileWidth)
-                        .clipShape(Circle())
                     
                     let info = viewModel.getLevelInfo()
                     ProgressBarView(current: info.currentLevelXP, maximum: info.nextLevelXP, level: info.level)
