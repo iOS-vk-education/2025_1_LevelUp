@@ -27,9 +27,14 @@ struct LoginFormView: View {
             )
             
             FormButton(title: "Войти") {
-                viewModel.login()
-                if viewModel.isFormValid {
-                    onSuccess()
+                guard viewModel.isFormValid else { return }
+                viewModel.login { result in
+                    switch result {
+                    case .success:
+                        onSuccess()
+                    case .failure(let error):
+                        print("Login error:", error.localizedDescription)
+                    }
                 }
             }
         }
