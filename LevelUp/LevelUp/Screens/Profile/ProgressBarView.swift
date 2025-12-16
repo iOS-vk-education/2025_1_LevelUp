@@ -13,6 +13,7 @@ struct ProgressBarView: View {
     let level: Int
     
     var height: CGFloat = 12
+    var showTitle: Bool = true
 
     private var progress: Double {
         guard maximum > 0 else { return 0 }
@@ -25,10 +26,12 @@ struct ProgressBarView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Text("Level \(level)")
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(.primary)
+            if showTitle {
+                Text("Level \(level)")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(.primary)
+            }
 
             AppProgressView(progress: clampedProgress, height: height)
 
