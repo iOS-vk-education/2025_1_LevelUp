@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @EnvironmentObject private var sessionManager: SessionManager
+
     private let maxProfileWidth: CGFloat = 280
 
     private let headerHeight: CGFloat = 400
@@ -23,24 +25,39 @@ struct ProfileView: View {
     @State private var scrollY: CGFloat = 0
 
     var body: some View {
-        ZStack(alignment: .top) {
-            Color.init(.systemGroupedBackground)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack(alignment: .top) {
+                Color.init(.systemGroupedBackground)
+                    .ignoresSafeArea()
 
-            headerLayer
-                .frame(height: headerHeight)
-                .ignoresSafeArea(edges: .top)
+                headerLayer
+                    .frame(height: headerHeight)
+                    .ignoresSafeArea(edges: .top)
 
-            ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    scrollTracker
-                    Color.clear
-                        .frame(height: headerHeight)
-                    contentSheet
+                ScrollView(.vertical) {
+                    VStack(spacing: 0) {
+                        scrollTracker
+                        Color.clear
+                            .frame(height: headerHeight)
+                        contentSheet
+                    }
+                }
+                .coordinateSpace(name: "scroll")
+                .scrollIndicators(.hidden)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(role: .destructive) {
+                            sessionManager.signOut()
+                        } label: {
+                            Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
                 }
             }
-            .coordinateSpace(name: "scroll")
-            .scrollIndicators(.hidden)
         }
     }
 
@@ -189,4 +206,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
+        .environmentObject(SessionManager())
 }

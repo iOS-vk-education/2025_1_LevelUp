@@ -59,6 +59,7 @@ struct Task: Identifiable, Equatable {
     var isCompleted: Bool
     var date: Date
     var tag: TaskTag?
+    var difficulty: TaskDifficulty
 
     init(
         id: UUID = UUID(),
@@ -66,7 +67,8 @@ struct Task: Identifiable, Equatable {
         description: String = "",
         isCompleted: Bool = false,
         date: Date = Date(),
-        tag: TaskTag? = nil
+        tag: TaskTag? = nil,
+        difficulty: TaskDifficulty = .medium
     ) {
         self.id = id
         self.title = title
@@ -74,5 +76,6 @@ struct Task: Identifiable, Equatable {
         self.isCompleted = isCompleted
         self.date = date
         self.tag = tag
+        self.difficulty = difficulty
     }
 }
