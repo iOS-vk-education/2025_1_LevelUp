@@ -82,7 +82,7 @@ let TasksLordAch = Achievement(
     goal: 1,
     tint: .green,
     icon: Image("tasks_completer_ach"),
-    wage: 10,
+    wage: 20,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
 
@@ -93,7 +93,7 @@ let TasksLord2Ach = Achievement(
     goal: 100,
     tint: .green,
     icon: Image("tasks_completer_ach"),
-    wage: 10,
+    wage: 300,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
 
@@ -104,7 +104,7 @@ let TasksLord3Ach = Achievement(
     goal: 1000,
     tint: .green,
     icon: Image("tasks_completer_ach"),
-    wage: 10,
+    wage: 3000,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
 
@@ -120,7 +120,7 @@ let LevelUpAch = Achievement(
     goal: 2,
     tint: .orange,
     icon: Image("level_up_ach"),
-    wage: 10,
+    wage: 20,
     getCurrent: getCurrentLevel
 )
 
@@ -131,18 +131,18 @@ let LevelUp2Ach = Achievement(
     goal: 10,
     tint: .orange,
     icon: Image("level_up_ach"),
-    wage: 10,
+    wage: 150,
     getCurrent: getCurrentLevel
 )
 
 let LevelUp3Ach = Achievement(
     id: 6,
     title: "LevelUp 3",
-    description: "Достигните 50 уровня",
-    goal: 50,
+    description: "Достигните 30 уровня",
+    goal: 30,
     tint: .orange,
     icon: Image("level_up_ach"),
-    wage: 10,
+    wage: 1000,
     getCurrent: getCurrentLevel
 )
 
@@ -153,7 +153,7 @@ let ProductivemorningAch = Achievement(
     goal: 1,
     tint: .pink,
     icon: Image("good_morning_ach"),
-    wage: 10,
+    wage: 200,
     getCurrent: {
         return Statistics.shared.xpPoints.count { point in
             let calendar = Calendar.current
@@ -171,7 +171,7 @@ let HabitsIsAllWeHaveAch = Achievement(
     goal: 1,
     tint: .red,
     icon: Image("habits_ach"),
-    wage: 10,
+    wage: 100,
     getCurrent: {
         CompletedHabits.shared.count
     }
@@ -184,7 +184,7 @@ let HabitsIsAllWeHave2Ach = Achievement(
     goal: 10,
     tint: .red,
     icon: Image("habits_ach"),
-    wage: 10,
+    wage: 1000,
     getCurrent: {
         CompletedHabits.shared.count
     }
@@ -197,7 +197,7 @@ let HabitsIsAllWeHave3Ach = Achievement(
     goal: 100,
     tint: .red,
     icon: Image("habits_ach"),
-    wage: 10,
+    wage: 5000,
     getCurrent: {
         CompletedHabits.shared.count
     }
@@ -235,7 +235,7 @@ let ProductiveDayAch = Achievement(
     goal: 1,
     tint: .purple,
     icon: Image("productive_day_ach"),
-    wage: 10,
+    wage: 100,
     getCurrent: countProductiveDays
 )
 
@@ -246,7 +246,7 @@ let ProductiveDay2Ach = Achievement(
     goal: 10,
     tint: .purple,
     icon: Image("productive_day_ach"),
-    wage: 10,
+    wage: 500,
     getCurrent: countProductiveDays
 )
 
@@ -257,7 +257,7 @@ let ProductiveDay3Ach = Achievement(
     goal: 100,
     tint: .purple,
     icon: Image("productive_day_ach"),
-    wage: 10,
+    wage: 5000,
     getCurrent: countProductiveDays
 )
 
@@ -269,7 +269,7 @@ let AlwaysCompletedAch = Achievement(
     goal: 0,
     tint: .red,
     icon: Image("achiever_ach"),
-    wage: 1000,
+    wage: 0,
     getCurrent: {
         return 1
     }
