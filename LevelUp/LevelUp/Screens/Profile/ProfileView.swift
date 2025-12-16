@@ -65,9 +65,11 @@ struct ProfileView: View {
         let info = viewModel.getLevelInfo()
 
         return VStack(spacing: 4) {
+            
 
             Text("Профиль")
                 .font(.system(size: 32, weight: .bold))
+                .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .opacity(profileTitleOpacity)
                 .scaleEffect(profileTitleScale)
@@ -105,14 +107,18 @@ struct ProfileView: View {
                 showTitle: false
             )
             .padding(.horizontal, 16)
+            .opacity(profileImageOpacity)
+            .scaleEffect(profileImageScale)
+            .animation(.easeOut(duration: 0.15), value: scrollY)
         }
         .padding(.horizontal, 16)
         .padding(.top, 78)
+        .padding(.bottom, -48)
 
     }
 
     private var contentSheet: some View {
-        VStack(spacing: 16) {
+        VStack() {
             Text("Достижения")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.primary)
@@ -122,8 +128,9 @@ struct ProfileView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
+                .padding(.bottom, 24)
 
-            VStack(spacing: 0) {
+            VStack(spacing: 12) {
                 ForEach(AchievementsStorage.shared.achs) { achievement in
                     AchievementView(achievement: achievement)
                         .padding(.horizontal, 16)
@@ -132,7 +139,6 @@ struct ProfileView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)
-        .background(Color(.systemBackground))
     }
 
     private var scrolledUp: CGFloat { max(0, -scrollY) }
