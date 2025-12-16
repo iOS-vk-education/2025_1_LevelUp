@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @EnvironmentObject private var sessionManager: SessionManager
+
     private let maxProfileWidth: CGFloat = 280
 
     private let headerHeight: CGFloat = 400
@@ -23,24 +25,39 @@ struct ProfileView: View {
     @State private var scrollY: CGFloat = 0
 
     var body: some View {
-        ZStack(alignment: .top) {
-            Color.init(.systemGroupedBackground)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack(alignment: .top) {
+                Color.init(.systemGroupedBackground)
+                    .ignoresSafeArea()
 
-            headerLayer
-                .frame(height: headerHeight)
-                .ignoresSafeArea(edges: .top)
+                headerLayer
+                    .frame(height: headerHeight)
+                    .ignoresSafeArea(edges: .top)
 
-            ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    scrollTracker
-                    Color.clear
-                        .frame(height: headerHeight)
-                    contentSheet
+                ScrollView(.vertical) {
+                    VStack(spacing: 0) {
+                        scrollTracker
+                        Color.clear
+                            .frame(height: headerHeight)
+                        contentSheet
+                    }
+                }
+                .coordinateSpace(name: "scroll")
+                .scrollIndicators(.hidden)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(role: .destructive) {
+                            sessionManager.signOut()
+                        } label: {
+                            Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
                 }
             }
-            .coordinateSpace(name: "scroll")
-            .scrollIndicators(.hidden)
         }
     }
 
@@ -135,12 +152,20 @@ struct ProfileView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
 
-            // :MARK: for debug only
-            Button("Добавить 10000xp") {
-                Statistics.shared.addCheatXp(10000)
+            Button("Добавить 10000 XP") {
+                // Добавляем опыт через extraXpWage, чтобы он сохранялся локально и в Firebase.
+                Statistics.shared.addExtraWage(10_000)
+
+                // Пересчитываем достижения, завязанные на прогрессе.
+                AchievementsStorage.shared.achs.forEach { achievement in
+                    achievement.recalculate()
+                }
+
+                // Сохраняем прогресс текущего пользователя в Firebase.
+                _Concurrency.Task {
+                    try? await ProgressService.shared.saveCurrentUserProgress()
+                }
             }
-            Text("Не будет сохраняться при перезапуске")
-                .foregroundStyle(.gray)
             
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(AchievementsStorage.shared.achs) { achievement in
@@ -181,4 +206,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
+        .environmentObject(SessionManager())
 }

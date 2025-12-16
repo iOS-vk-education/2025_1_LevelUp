@@ -11,6 +11,7 @@ struct Habit: Identifiable {
     var endDate: Date?
     let iconName: String
     let tint: Color
+    var difficulty: TaskDifficulty
 
     init(
         id: UUID = UUID(),
@@ -22,7 +23,8 @@ struct Habit: Identifiable {
         skipDates: Set<Date> = [],
         endDate: Date? = nil,
         iconName: String,
-        tint: Color
+        tint: Color,
+        difficulty: TaskDifficulty = .medium
     ) {
         self.id = id
         self.title = title
@@ -34,5 +36,6 @@ struct Habit: Identifiable {
         self.endDate = endDate
         self.iconName = iconName
         self.tint = tint
+        self.difficulty = difficulty
     }
 }

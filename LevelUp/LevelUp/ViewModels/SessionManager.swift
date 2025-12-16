@@ -19,6 +19,15 @@ final class SessionManager: ObservableObject {
                 self?.currentUser = user
                 self?.isAuthenticated = user != nil
             }
+            
+            // При входе пользователя подтягиваем прогресс из Firebase,
+            // чтобы опыт и достижения, полученные ранее (в том числе через "Добавить XP"),
+            // восстановились.
+            if user != nil {
+                _Concurrency.Task {
+                    try? await ProgressService.shared.loadCurrentUserProgress()
+                }
+            }
         }
     }
     

@@ -6,11 +6,7 @@ struct LevelUpApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var sessionManager = SessionManager()
 
-    init() {
-        #if DEBUG
-        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-        #endif
-    }
+    init() {}
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,

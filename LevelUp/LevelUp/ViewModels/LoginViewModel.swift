@@ -87,4 +87,3 @@ class LoginViewModel: ObservableObject {
         !phone.isEmpty && !password.isEmpty
     }
 }
-

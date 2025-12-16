@@ -27,7 +27,6 @@ struct LoginFormView: View {
                 isVisible: $viewModel.showPassword
             )
             .disabled(viewModel.isLoading)
-            
             if viewModel.showError, let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .font(.caption)
