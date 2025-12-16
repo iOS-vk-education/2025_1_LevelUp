@@ -14,7 +14,7 @@ class LoginViewModel: ObservableObject {
     @Published var phone = ""
     @Published var password = ""
     @Published var showPassword = false
-    
+
     func login() {
         print("Logging in user with phone: \(phone)")
     }
@@ -23,4 +23,3 @@ class LoginViewModel: ObservableObject {
         !phone.isEmpty && !password.isEmpty
     }
 }
-

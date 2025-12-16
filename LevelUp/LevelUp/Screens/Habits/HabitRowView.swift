@@ -27,6 +27,8 @@ struct HabitRowView: View {
                 Text(habit.description)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                HabitDifficultyBadge(difficulty: habit.difficulty)
             }
 
             Spacer()
@@ -58,5 +60,27 @@ struct HabitRowView: View {
         .onTapGesture {
             onEdit()
         }
+    }
+}
+
+private struct HabitDifficultyBadge: View {
+    let difficulty: TaskDifficulty
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(difficulty.color)
+                .frame(width: 8, height: 8)
+            Text(difficulty.title)
+            Text("\(difficulty.xpReward) XP")
+        }
+        .font(.caption.weight(.semibold))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            Capsule(style: .continuous)
+                .fill(difficulty.color.opacity(0.12))
+        )
+        .foregroundStyle(difficulty.color)
     }
 }

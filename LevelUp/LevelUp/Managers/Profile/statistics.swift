@@ -63,21 +63,43 @@ class Statistics {
         }
     }
     
-    let xpByLevel = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+    @ObservationIgnored
+    private var xpForNextLvl: [Int] {
+        var xp: [Int] = [30, 60, 120]
+        for _ in 5...10 {
+            xp.append(xp.last! + 30)
+        }
+        assert(xp.last! == 300)
+        xp += [420, 780, 1500, 1560]
+        for _ in 15...40 {
+            xp.append(xp.last! + 300)
+        }
+        assert(xp.last! == 9360)
+        return xp
+    }
     
     func getLevelInfo() -> LevelInfo {
-        var totalXP = xpPoints.reduce(0) { a, b in a + b.value }
+        var totalXP = cheatXp
+        
+        totalXP += xpPoints.reduce(0) { a, b in a + b.value }
         totalXP += extraXpWage
-        for i in 0..<xpByLevel.count {
-            if totalXP < xpByLevel[i] {
-                return LevelInfo(level: i + 1, currentLevelXP: totalXP, nextLevelXP: xpByLevel[i])
+        for i in 0..<xpForNextLvl.count {
+            if totalXP < xpForNextLvl[i] {
+                return LevelInfo(level: i + 1, currentLevelXP: totalXP, nextLevelXP: xpForNextLvl[i])
             }
-            totalXP -= xpByLevel[i]
+            totalXP -= xpForNextLvl[i]
         }
-        return LevelInfo(level: xpByLevel.count + 1, currentLevelXP: 0, nextLevelXP: 0)
+        return LevelInfo(level: xpForNextLvl.count + 1, currentLevelXP: 0, nextLevelXP: 0)
     }
     
     func addExtraWage(_ amount: Int) {
         extraXpWage += amount
+    }
+    
+    // :MARK: for debug only
+    var cheatXp: Int = 0
+    
+    func addCheatXp(_ amount: Int) {
+        cheatXp += amount
     }
 }
