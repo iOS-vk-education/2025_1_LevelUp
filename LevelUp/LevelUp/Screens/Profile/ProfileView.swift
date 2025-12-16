@@ -8,104 +8,157 @@
 import SwiftUI
 
 struct ProfileView: View {
-    let name = "Луффи"
-    
+    private let maxProfileWidth: CGFloat = 280
+
+    private let headerHeight: CGFloat = 400
+
+    private let fadeStart: CGFloat = 0
+    private let fadeDistance: CGFloat = 140
+
+    private let scaleStart: CGFloat = 0
+    private let scaleDistance: CGFloat = 180
+    private let minScale: CGFloat = 0.88
+
+    @State private var viewModel = ProfileViewModel()
+    @State private var scrollY: CGFloat = 0
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                HStack {
-                    VStack {
-                        Image("Profile")
-                            .resizable()
-                            .frame(
-                                width: ProfileViewSizes.iconSize.rawValue,
-                                height: ProfileViewSizes.iconSize.rawValue)
-                            .clipShape(Circle())
-                        
-                        HStack {
-                            HStack(spacing: 4) {
-                                Text("11")
-                                Image(systemName: "wind.snow")
-                                    .foregroundStyle(.blue, .yellow.opacity(0.4))
-                            }
-                            HStack(spacing: 4) {
-                                Text("7")
-                                Image(systemName: "flame.fill")
-                                    .foregroundColor(.orange)
-                            }
-                        }
-                    }
-                    
-                    VStack(spacing: 11) {
-                        ProgressBarView(
-                            current: 40,
-                            maximum: 100,
-                            icon: Image("energy"),
-                            mainColor: .yellow,
-                            secondaryColor: .yellow.opacity(0.3),
-                            description: "Энергия"
-                        )
-                        ProgressBarView(
-                            current: 40,
-                            maximum: 100,
-                            icon: Image("physicalEnergy"),
-                            mainColor: .brown,
-                            secondaryColor: .brown.opacity(0.3),
-                            description: "Физическа энергия",
-                        )
-                        ProgressBarView(
-                            current: 40,
-                            maximum: 100,
-                            icon: Image("expirience"),
-                            mainColor: .green,
-                            secondaryColor: .green.opacity(0.3),
-                            description: "Опыт"
-                        )
-                    }
+        ZStack(alignment: .top) {
+            Color.init(.systemGroupedBackground)
+                .ignoresSafeArea()
+
+            headerLayer
+                .frame(height: headerHeight)
+                .ignoresSafeArea(edges: .top)
+
+            ScrollView(.vertical) {
+                VStack(spacing: 0) {
+                    scrollTracker
+                    Color.clear
+                        .frame(height: headerHeight)
+                    contentSheet
                 }
-                
-                HStack {
-                    Image("cup")
-                        .frame(
-                            width: ProfileViewSizes.cupSize.rawValue,
-                            height: ProfileViewSizes.cupSize.rawValue)
-                    Text("12")
-                        .font(.system(size: 32))
-                    Spacer()
-                    Text("Достижения")
-                        .titleText()
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(AcheevementBackgroundView())
-                
-                Text("Набранный опыт за последнюю неделю")
-                    .bodyText()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: ProfileViewSizes.statisticsMaxWidth.rawValue)
-                WeekXPView(color: .green)
-                
-                
-                Text("Потрачено энергии за последнюю неделю")
-                    .bodyText()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.center)
-                    .frame(width: ProfileViewSizes.statisticsMaxWidth.rawValue)
-                
-                WeekXPView(color: .yellow)
-                
-                Text("Потрачено физической энергии за последнюю неделю")
-                    .bodyText()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.center)
-                    .frame(width: ProfileViewSizes.statisticsMaxWidth.rawValue)
-                
-                WeekXPView(color: .brown)
             }
+            .coordinateSpace(name: "scroll")
+            .scrollIndicators(.hidden)
+        }
+    }
+
+    private var scrollTracker: some View {
+        GeometryReader { geo in
+            Color.clear
+                .preference(key: ScrollYKey.self,
+                            value: geo.frame(in: .named("scroll")).minY)
+        }
+        .frame(height: 0)
+        .onPreferenceChange(ScrollYKey.self) { scrollY = $0 }
+    }
+
+    private struct ScrollYKey: PreferenceKey {
+        static var defaultValue: CGFloat = 0
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+            value = nextValue()
+        }
+    }
+
+    private var headerLayer: some View {
+        let info = viewModel.getLevelInfo()
+
+        return VStack(spacing: 4) {
+
+            Text("Профиль")
+                .font(.system(size: 32, weight: .bold))
+                .frame(maxWidth: .infinity, alignment: .center)
+                .opacity(profileTitleOpacity)
+                .scaleEffect(profileTitleScale)
+
+            ZStack(alignment: .bottomLeading) {
+                Image("profile_pic")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: maxProfileWidth, maxHeight: maxProfileWidth)
+                    .opacity(profileImageOpacity)
+                    .scaleEffect(profileImageScale)
+                    .animation(.easeOut(duration: 0.15), value: scrollY)
+
+                Text("Уровень \(info.level)")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.black.opacity(0.35))
+                    )
+                    .padding(.bottom, 6)
+                    .offset(x: -24)
+                    .opacity(profileImageOpacity)
+                    .scaleEffect(profileImageScale)
+                    .animation(.easeOut(duration: 0.15), value: scrollY)
+
+            }
+
+            ProgressBarView(
+                current: info.currentLevelXP,
+                maximum: info.nextLevelXP,
+                level: info.level,
+                showTitle: false
+            )
             .padding(.horizontal, 16)
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 78)
+
+    }
+
+    private var contentSheet: some View {
+        VStack(spacing: 16) {
+            Text("Достижения")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(.primary)
+                .padding(.top, 12)
+            Text("Выполненно \(viewModel.nCurrentAchs) из \(viewModel.nTotalAchs) достижений")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 16)
+
+            VStack(spacing: 0) {
+                ForEach(AchievementsStorage.shared.achs) { achievement in
+                    AchievementView(achievement: achievement)
+                        .padding(.horizontal, 16)
+                    Divider()
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .background(Color(.systemBackground))
+    }
+
+    private var scrolledUp: CGFloat { max(0, -scrollY) }
+
+    private var profileImageOpacity: CGFloat {
+        let x = max(0, scrolledUp - fadeStart)
+        let t = 1 - (x / fadeDistance)
+        return min(1, max(0, t))
+    }
+
+    private var profileImageScale: CGFloat {
+        let x = max(0, scrolledUp - scaleStart)
+        let t = 1 - (x / scaleDistance) * (1 - minScale)
+        return min(1, max(minScale, t))
+    }
+
+    private var profileTitleOpacity: CGFloat {
+        let x = max(0, scrolledUp - fadeStart)
+        let t = 1 - (x / (fadeDistance * 0.9))
+        return min(1, max(0, t))
+    }
+
+    private var profileTitleScale: CGFloat {
+        let x = max(0, scrolledUp - scaleStart)
+        let t = 1 - (x / (scaleDistance * 0.9)) * (1 - 0.92)
+        return min(1, max(0.92, t))
     }
 }
 

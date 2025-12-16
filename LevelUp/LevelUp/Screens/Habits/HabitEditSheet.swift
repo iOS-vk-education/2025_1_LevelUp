@@ -16,7 +16,8 @@ struct HabitEditSheet: View {
 
                 Section("Описание") {
                     TextField("Add a short description", text: $viewModel.draftDescription, axis: .vertical)
-                        .lineLimit(2...4)
+                        .lineLimit(3...6)
+                        .frame(minHeight: 80, alignment: .topLeading)
                 }
 
                 Section("Повторение") {

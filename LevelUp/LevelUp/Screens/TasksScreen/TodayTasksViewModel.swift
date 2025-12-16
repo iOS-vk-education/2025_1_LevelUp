@@ -38,13 +38,42 @@ final class TodayTasksViewModel: ObservableObject {
         }
     }
     
+    var pointByTask: [UUID:Point] = [:]
+    
     func toggleCompletion(for task:Task) {
         guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
         allTasks[index].isCompleted.toggle()
+        
+        if allTasks[index].isCompleted {
+            let p = Point(date: task.date, value: 100)
+            pointByTask[task.id] = p
+            Statistics.shared.addXPPoint(point: p)
+        } else {
+            if let p = pointByTask.removeValue(forKey: task.id) {
+                Statistics.shared.delXPPoint(point: p)
+            }
+        }
     }
     
-    func addTask(title: String) {
-        let newTask = Task(title: title)
+    func addTask(title: String, date: Date) {
+        let newTask = Task(title: title, date: date)
         allTasks.append(newTask)
+    }
+    
+    func deleteTask(_ task: Task) {
+        guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
+
+        if allTasks[index].isCompleted, let p = pointByTask.removeValue(forKey: task.id) {
+            Statistics.shared.delXPPoint(point: p)
+        }
+
+        allTasks.remove(at: index)
+    }
+
+    func updateTask(_ task: Task, newTitle: String, newDescription: String, newTag: TaskTag?) {
+        guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
+        allTasks[index].title = newTitle
+        allTasks[index].description = newDescription
+        allTasks[index].tag = newTag
     }
 }
