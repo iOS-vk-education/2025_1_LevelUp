@@ -6,7 +6,6 @@ struct TaskEditSheet: View {
     @State private var title: String
     @State private var description: String
     @State private var tag: TaskTag?
-    @State private var difficulty: TaskDifficulty
     @FocusState private var isTitleFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
@@ -16,7 +15,6 @@ struct TaskEditSheet: View {
         _title = State(initialValue: task.title)
         _description = State(initialValue: task.description)
         _tag = State(initialValue: task.tag)
-        _difficulty = State(initialValue: task.difficulty)
     }
 
     var body: some View {
@@ -34,20 +32,6 @@ struct TaskEditSheet: View {
 
                 Section("Тег") {
                     tagPicker
-                }
-
-                Section("Сложность") {
-                    Picker("Сложность", selection: $difficulty) {
-                        ForEach(TaskDifficulty.allCases, id: \.self) { difficulty in
-                            Text(difficulty.title)
-                                .tag(difficulty)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    Text("За выполнение: \(difficulty.xpReward) XP")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("Редактировать задачу")
@@ -77,13 +61,7 @@ struct TaskEditSheet: View {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTitle.isEmpty else { return }
-        viewModel.updateTask(
-            task,
-            newTitle: trimmedTitle,
-            newDescription: trimmedDescription,
-            newTag: tag,
-            newDifficulty: difficulty
-        )
+        viewModel.updateTask(task, newTitle: trimmedTitle, newDescription: trimmedDescription, newTag: tag)
         dismiss()
     }
 
