@@ -38,6 +38,15 @@ final class TasksService {
                 tag = TaskTag(rawValue: tagRaw)
             }
 
+            // difficulty (easy / medium / hard)
+            let difficulty: TaskDifficulty
+            if let difficultyRaw = data["difficulty"] as? String,
+               let parsed = TaskDifficulty(rawValue: difficultyRaw) {
+                difficulty = parsed
+            } else {
+                difficulty = .medium
+            }
+
             let id: UUID
             if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
                 id = uuid
@@ -53,7 +62,8 @@ final class TasksService {
                 description: description,
                 isCompleted: isCompleted,
                 date: date,
-                tag: tag
+                tag: tag,
+                difficulty: difficulty
             )
         }
 
@@ -80,7 +90,8 @@ final class TasksService {
                 "description": task.description,
                 "isCompleted": task.isCompleted,
                 "date": Timestamp(date: task.date),
-                "tag": task.tag?.rawValue as Any
+                "tag": task.tag?.rawValue as Any,
+                "difficulty": task.difficulty.rawValue
             ]
 
             try await collection.document(task.id.uuidString).setData(data, merge: false)
