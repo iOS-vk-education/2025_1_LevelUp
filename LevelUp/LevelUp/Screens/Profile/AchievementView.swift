@@ -53,7 +53,7 @@ struct AchievementView: View {
 
     var body: some View {
         ZStack {
-            GlassTileBackground(color: .blue)
+            GlassTileBackground(color: achievement.isCompleted ? achievement.tint : Color.gray)
 
             VStack(spacing: 8) {
                 ZStack {
