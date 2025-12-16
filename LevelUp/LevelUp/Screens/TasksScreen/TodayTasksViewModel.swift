@@ -63,7 +63,6 @@ final class TodayTasksViewModel: ObservableObject {
     func deleteTask(_ task: Task) {
         guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
 
-        // если задача была выполнена и ты начислял XP — аккуратно удалим
         if allTasks[index].isCompleted, let p = pointByTask.removeValue(forKey: task.id) {
             Statistics.shared.delXPPoint(point: p)
         }
@@ -71,8 +70,10 @@ final class TodayTasksViewModel: ObservableObject {
         allTasks.remove(at: index)
     }
 
-    func updateTask(_ task: Task, newTitle: String) {
+    func updateTask(_ task: Task, newTitle: String, newDescription: String, newTag: TaskTag?) {
         guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
         allTasks[index].title = newTitle
+        allTasks[index].description = newDescription
+        allTasks[index].tag = newTag
     }
 }
