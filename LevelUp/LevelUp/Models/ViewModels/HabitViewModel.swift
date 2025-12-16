@@ -1,17 +1,11 @@
 import SwiftUI
 import Combine
 
-private struct HabitCompletionKey: Hashable {
-    let habitId: UUID
-    let date: Date
-}
-
 final class HabitViewModel: ObservableObject {
     @Published var habits: [Habit]
     @Published var weekDays: [WeekDay] = []
     @Published var selectedDate: Date
     @Published var completions: [Date: Set<UUID>] = [:]
-    private var xpPointsByCompletion: [HabitCompletionKey: Point] = [:]
 
     @Published var editingHabit: Habit?
     @Published var draftTitle: String = ""
@@ -19,7 +13,6 @@ final class HabitViewModel: ObservableObject {
     @Published var draftIsDone: Bool = false
     @Published var draftIconName: String = ""
     @Published var draftRepeatDays: Set<Int>
-    @Published var draftDifficulty: TaskDifficulty = .medium
     @Published var isCreatingNew: Bool = false
     @Published var showDeleteOptions: Bool = false
 
@@ -48,7 +41,7 @@ final class HabitViewModel: ObservableObject {
 
     func toggleHabit(_ habit: Habit, on date: Date) {
         let done = isHabitDone(habit, on: date)
-        setHabit(habit, done: !done, on: date)
+        setHabit(habit.id, done: !done, on: date)
         refreshWeek(for: selectedDate)
     }
 
@@ -63,8 +56,7 @@ final class HabitViewModel: ObservableObject {
             createdOn: date,
             repeatDays: [weekday],
             iconName: icon,
-            tint: tint,
-            difficulty: .medium
+            tint: tint
         )
 
         editingHabit = newHabit
@@ -73,7 +65,6 @@ final class HabitViewModel: ObservableObject {
         draftIsDone = false
         draftIconName = icon
         draftRepeatDays = [weekday]
-        draftDifficulty = .medium
         isCreatingNew = true
         showDeleteOptions = false
     }
@@ -85,7 +76,6 @@ final class HabitViewModel: ObservableObject {
         draftIsDone = isHabitDone(habit, on: selectedDay)
         draftIconName = habit.iconName
         draftRepeatDays = habit.repeatDays
-        draftDifficulty = habit.difficulty
         isCreatingNew = false
         showDeleteOptions = false
     }
@@ -98,7 +88,6 @@ final class HabitViewModel: ObservableObject {
         let trimmedDescription = draftDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         let chosenIcon = draftIconName.isEmpty ? currentHabit.iconName : draftIconName
         let repeatDays = draftRepeatDays.isEmpty ? currentHabit.repeatDays : draftRepeatDays
-        let chosenDifficulty = draftDifficulty
 
         let updatedHabit = Habit(
             id: currentHabit.id,
@@ -110,8 +99,7 @@ final class HabitViewModel: ObservableObject {
             skipDates: currentHabit.skipDates,
             endDate: currentHabit.endDate,
             iconName: chosenIcon,
-            tint: currentHabit.tint,
-            difficulty: chosenDifficulty
+            tint: currentHabit.tint
         )
 
         withAnimation(.easeInOut) {
@@ -122,10 +110,7 @@ final class HabitViewModel: ObservableObject {
             }
         }
 
-        setHabit(updatedHabit, done: draftIsDone, on: selectedDay)
-        if updatedHabit.difficulty != currentHabit.difficulty {
-            refreshXPPoints(for: updatedHabit)
-        }
+        setHabit(updatedHabit.id, done: draftIsDone, on: selectedDay)
         refreshWeek(for: selectedDay)
         resetEditingState()
     }
@@ -225,24 +210,13 @@ final class HabitViewModel: ObservableObject {
         return true
     }
 
-    private func setHabit(_ habit: Habit, done: Bool, on date: Date) {
+    private func setHabit(_ habitID: UUID, done: Bool, on date: Date) {
         let key = dayKey(date)
         var set = completions[key] ?? Set<UUID>()
-        let completionKey = HabitCompletionKey(habitId: habit.id, date: key)
-        let alreadyDone = set.contains(habit.id)
-
         if done {
-            set.insert(habit.id)
-            if alreadyDone {
-                refreshXPPoint(for: habit, on: key, completionKey: completionKey)
-            } else {
-                addXPPoint(for: habit, on: key, completionKey: completionKey)
-            }
+            set.insert(habitID)
         } else {
-            set.remove(habit.id)
-            if alreadyDone {
-                removeXPPoint(for: completionKey)
-            }
+            set.remove(habitID)
         }
         if set.isEmpty {
             completions.removeValue(forKey: key)
@@ -251,38 +225,10 @@ final class HabitViewModel: ObservableObject {
         }
     }
 
-    private func addXPPoint(for habit: Habit, on date: Date, completionKey: HabitCompletionKey) {
-        let point = Point(date: date, value: habit.difficulty.xpReward)
-        xpPointsByCompletion[completionKey] = point
-        Statistics.shared.addXPPoint(point: point)
-    }
-
-    private func removeXPPoint(for completionKey: HabitCompletionKey) {
-        guard let point = xpPointsByCompletion.removeValue(forKey: completionKey) else { return }
-        Statistics.shared.delXPPoint(point: point)
-    }
-
-    private func refreshXPPoint(for habit: Habit, on date: Date, completionKey: HabitCompletionKey) {
-        if let previous = xpPointsByCompletion[completionKey] {
-            Statistics.shared.delXPPoint(point: previous)
-        }
-        let updatedPoint = Point(date: date, value: habit.difficulty.xpReward)
-        xpPointsByCompletion[completionKey] = updatedPoint
-        Statistics.shared.addXPPoint(point: updatedPoint)
-    }
-
-    private func refreshXPPoints(for habit: Habit) {
-        for (date, set) in completions where set.contains(habit.id) {
-            let key = HabitCompletionKey(habitId: habit.id, date: date)
-            refreshXPPoint(for: habit, on: date, completionKey: key)
-        }
-    }
-
     private func removeCompletion(_ habitID: UUID, on date: Date) {
         let key = dayKey(date)
         guard var set = completions[key] else { return }
         set.remove(habitID)
-        removeXPPoint(for: HabitCompletionKey(habitId: habitID, date: key))
         if set.isEmpty {
             completions.removeValue(forKey: key)
         } else {
@@ -298,7 +244,6 @@ final class HabitViewModel: ObservableObject {
             if shouldDrop {
                 var newSet = set
                 newSet.remove(habitID)
-                removeXPPoint(for: HabitCompletionKey(habitId: habitID, date: date))
                 if !newSet.isEmpty {
                     result[date] = newSet
                 }

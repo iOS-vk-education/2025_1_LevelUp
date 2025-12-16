@@ -135,12 +135,20 @@ struct ProfileView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
 
-            // :MARK: for debug only
-            Button("Добавить 10000xp") {
-                Statistics.shared.addCheatXp(10000)
+            Button("Добавить 10000 XP") {
+                // Добавляем опыт через extraXpWage, чтобы он сохранялся локально и в Firebase.
+                Statistics.shared.addExtraWage(10_000)
+
+                // Пересчитываем достижения, завязанные на прогрессе.
+                AchievementsStorage.shared.achs.forEach { achievement in
+                    achievement.recalculate()
+                }
+
+                // Сохраняем прогресс текущего пользователя в Firebase.
+                _Concurrency.Task {
+                    try? await ProgressService.shared.saveCurrentUserProgress()
+                }
             }
-            Text("Не будет сохраняться при перезапуске")
-                .foregroundStyle(.gray)
             
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(AchievementsStorage.shared.achs) { achievement in
