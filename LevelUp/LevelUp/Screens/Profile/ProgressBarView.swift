@@ -16,6 +16,7 @@ struct ProgressBarView: View {
     var showTitle: Bool = true
 
     private var progress: Double {
+        guard current < maximum else { return 1 }
         guard maximum > 0 else { return 0 }
         return Double(current) / Double(maximum)
     }
@@ -37,6 +38,10 @@ struct ProgressBarView: View {
 
             if maximum > 0 {
                 Text("\(current) / \(maximum)")
+                    .hiddenText()
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            } else {
+                Text("Максимальный уровень")
                     .hiddenText()
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
