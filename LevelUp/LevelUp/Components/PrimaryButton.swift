@@ -10,7 +10,6 @@ import SwiftUI
 struct PrimaryButton: View {
     let title: String
     let action: () -> Void
-    @Environment(\.isEnabled) private var isEnabled
     
     var body: some View {
         Button(action: action) {
@@ -20,7 +19,7 @@ struct PrimaryButton: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: UIConstants.Sizes.buttonHeight)
         }
-        .background(isEnabled ? Color("ButColor") : Color.gray.opacity(0.5))
+        .background(Color("ButColor"))
         .cornerRadius(UIConstants.Sizes.buttonCornerRadius)
     }
 }

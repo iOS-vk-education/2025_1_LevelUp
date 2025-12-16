@@ -18,14 +18,12 @@ struct RegisterFormView: View {
                 placeholder: "Введите имя",
                 text: $viewModel.name
             )
-            .disabled(viewModel.isLoading)
             
             PhoneInputView(
                 title: "Телефон *",
                 placeholder: "+7 987 123-23-23",
                 text: $viewModel.phone
             )
-            .disabled(viewModel.isLoading)
             
             PasswordInputView(
                 title: "Пароль *",
@@ -33,7 +31,6 @@ struct RegisterFormView: View {
                 text: $viewModel.password,
                 isVisible: $viewModel.showPassword
             )
-            .disabled(viewModel.isLoading)
             
             PasswordInputView(
                 title: "Подтверждение пароля *",
@@ -41,29 +38,12 @@ struct RegisterFormView: View {
                 text: $viewModel.confirmPassword,
                 isVisible: $viewModel.showConfirmPassword
             )
-            .disabled(viewModel.isLoading)
             
-            if viewModel.showError, let errorMessage = viewModel.errorMessage {
-                Text(errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
-            }
-            
-            FormButton(title: viewModel.isLoading ? "Регистрация..." : "Создать аккаунт") {
-                viewModel.register { success in
-                    if success {
-                        onSuccess()
-                    }
+            FormButton(title: "Создать аккаунт") {
+                viewModel.register()
+                if viewModel.isFormValid {
+                    onSuccess()
                 }
-            }
-            .disabled(viewModel.isLoading || !viewModel.isFormValid)
-            
-            if !viewModel.confirmPassword.isEmpty && !viewModel.passwordsMatch {
-                Text("Пароли не совпадают")
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
             }
         }
     }

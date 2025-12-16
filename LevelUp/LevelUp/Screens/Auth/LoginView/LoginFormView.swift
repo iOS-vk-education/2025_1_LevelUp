@@ -18,7 +18,6 @@ struct LoginFormView: View {
                 placeholder: "+7 987 123-23-23",
                 text: $viewModel.phone
             )
-            .disabled(viewModel.isLoading)
             
             PasswordInputView(
                 title: "Пароль *",
@@ -26,23 +25,18 @@ struct LoginFormView: View {
                 text: $viewModel.password,
                 isVisible: $viewModel.showPassword
             )
-            .disabled(viewModel.isLoading)
             
-            if viewModel.showError, let errorMessage = viewModel.errorMessage {
-                Text(errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
-            }
-            
-            FormButton(title: viewModel.isLoading ? "Вход..." : "Войти") {
-                viewModel.login { success in
-                    if success {
+            FormButton(title: "Войти") {
+                guard viewModel.isFormValid else { return }
+                viewModel.login { result in
+                    switch result {
+                    case .success:
                         onSuccess()
+                    case .failure(let error):
+                        print("Login error:", error.localizedDescription)
                     }
                 }
             }
-            .disabled(viewModel.isLoading || !viewModel.isFormValid)
         }
     }
 }
