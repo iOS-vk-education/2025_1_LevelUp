@@ -81,7 +81,7 @@ let TasksLordAch = Achievement(
     description: "Выполните первую задачу",
     goal: 1,
     tint: .green,
-    icon: Image(systemName: "checkmark.seal.fill"),
+    icon: Image("tasks_completer_ach"),
     wage: 10,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
@@ -92,7 +92,7 @@ let TasksLord2Ach = Achievement(
     description: "Выполните 100 задач",
     goal: 100,
     tint: .green,
-    icon: Image(systemName: "checkmark.seal.fill"),
+    icon: Image("tasks_completer_ach"),
     wage: 10,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
@@ -103,7 +103,7 @@ let TasksLord3Ach = Achievement(
     description: "Выполните 1000 задач",
     goal: 1000,
     tint: .green,
-    icon: Image(systemName: "checkmark.seal.fill"),
+    icon: Image("tasks_completer_ach"),
     wage: 10,
     getCurrent: { Statistics.shared.xpPoints.count }
 )
@@ -119,7 +119,7 @@ let LevelUpAch = Achievement(
     description: "Достигните второго уровня",
     goal: 2,
     tint: .orange,
-    icon: Image(systemName: "chevron.up.2"),
+    icon: Image("level_up_ach"),
     wage: 10,
     getCurrent: getCurrentLevel
 )
@@ -130,7 +130,7 @@ let LevelUp2Ach = Achievement(
     description: "Достигните 10 уровня",
     goal: 10,
     tint: .orange,
-    icon: Image(systemName: "chevron.up.2"),
+    icon: Image("level_up_ach"),
     wage: 10,
     getCurrent: getCurrentLevel
 )
@@ -141,7 +141,7 @@ let LevelUp3Ach = Achievement(
     description: "Достигните 50 уровня",
     goal: 50,
     tint: .orange,
-    icon: Image(systemName: "chevron.up.2"),
+    icon: Image("level_up_ach"),
     wage: 10,
     getCurrent: getCurrentLevel
 )
@@ -152,7 +152,7 @@ let ProductivemorningAch = Achievement(
     description: "Выполните задачу от 5:00 до 9:00 утра",
     goal: 1,
     tint: .pink,
-    icon: Image(systemName: "sunrise.fill"),
+    icon: Image("good_morning_ach"),
     wage: 10,
     getCurrent: {
         return Statistics.shared.xpPoints.count { point in
@@ -170,7 +170,7 @@ let HabitsIsAllWeHaveAch = Achievement(
     description: "Внедрите первую привычку",
     goal: 1,
     tint: .red,
-    icon: Image(systemName: "repeat.circle.fill"),
+    icon: Image("habits_ach"),
     wage: 10,
     getCurrent: {
         CompletedHabits.shared.count
@@ -183,7 +183,7 @@ let HabitsIsAllWeHave2Ach = Achievement(
     description: "Внедрите 10 привычек",
     goal: 10,
     tint: .red,
-    icon: Image(systemName: "repeat.circle.fill"),
+    icon: Image("habits_ach"),
     wage: 10,
     getCurrent: {
         CompletedHabits.shared.count
@@ -196,7 +196,7 @@ let HabitsIsAllWeHave3Ach = Achievement(
     description: "Внедрите 100 привычек",
     goal: 100,
     tint: .red,
-    icon: Image(systemName: "repeat.circle.fill"),
+    icon: Image("habits_ach"),
     wage: 10,
     getCurrent: {
         CompletedHabits.shared.count
@@ -234,7 +234,7 @@ let ProductiveDayAch = Achievement(
     description: "Заработайте за день 300 xp",
     goal: 1,
     tint: .purple,
-    icon: Image(systemName: "brain.head.profile"),
+    icon: Image("productive_day_ach"),
     wage: 10,
     getCurrent: countProductiveDays
 )
@@ -245,7 +245,7 @@ let ProductiveDay2Ach = Achievement(
     description: "Заработайте за день 300 xp 10 раз",
     goal: 10,
     tint: .purple,
-    icon: Image(systemName: "brain.head.profile"),
+    icon: Image("productive_day_ach"),
     wage: 10,
     getCurrent: countProductiveDays
 )
@@ -256,7 +256,7 @@ let ProductiveDay3Ach = Achievement(
     description: "Заработайте за день 300 xp 100 раз",
     goal: 100,
     tint: .purple,
-    icon: Image(systemName: "brain.head.profile"),
+    icon: Image("productive_day_ach"),
     wage: 10,
     getCurrent: countProductiveDays
 )
@@ -268,7 +268,7 @@ let AlwaysCompletedAch = Achievement(
     description: "Ничего не надо делать",
     goal: 0,
     tint: .red,
-    icon: Image(systemName: "party.popper.fill"),
+    icon: Image("achiever_ach"),
     wage: 1000,
     getCurrent: {
         return 1

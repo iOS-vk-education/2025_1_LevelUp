@@ -513,6 +513,11 @@ struct XPInfoView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 16) {
+                Image("mascott")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 360)
+
                 Text("Копи опыт и получай XP")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(.white)

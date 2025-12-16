@@ -56,15 +56,12 @@ struct AchievementView: View {
             GlassTileBackground(color: achievement.isCompleted ? achievement.tint : Color.gray)
 
             VStack(spacing: 8) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(achievement.tint.opacity(0.15))
-
-                    let iconColor = achievement.isCompleted ? achievement.tint : Color.gray
-                    achievement.icon
-                        .foregroundStyle(iconColor)
-                }
-                .frame(height: 40)
+                achievement.icon
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 64)
+                    .opacity(achievement.isCompleted ? 1 : 0.4)
+                    .padding(.top, 8)
 
                 VStack(spacing: 4) {
                     Text(achievement.title)
