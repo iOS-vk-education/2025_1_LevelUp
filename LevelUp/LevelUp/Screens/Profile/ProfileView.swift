@@ -118,7 +118,12 @@ struct ProfileView: View {
     }
 
     private var contentSheet: some View {
-        VStack() {
+        let columns = [
+            GridItem(.flexible(), spacing: 12),
+            GridItem(.flexible(), spacing: 12)
+        ]
+
+        return VStack() {
             Text("Достижения")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.primary)
@@ -130,13 +135,12 @@ struct ProfileView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
 
-            VStack(spacing: 12) {
+            LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(AchievementsStorage.shared.achs) { achievement in
                     AchievementView(achievement: achievement)
-                        .padding(.horizontal, 16)
-                    Divider()
                 }
             }
+            .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, alignment: .top)
     }
