@@ -8,6 +8,8 @@
 import Foundation
 import SwiftUI
 import Combine
+import FirebaseAuth
+import FirebaseFirestore
 
 
 @Observable
@@ -71,6 +73,10 @@ class Achievement: Identifiable {
             achievedOn = Date()
             Statistics.shared.addExtraWage(wage)
             AchievementsStorage.shared.nCompleted += 1
+
+            _Concurrency.Task {
+                try? await ProgressService.shared.saveCurrentUserProgress()
+            }
         }
     }
 }
