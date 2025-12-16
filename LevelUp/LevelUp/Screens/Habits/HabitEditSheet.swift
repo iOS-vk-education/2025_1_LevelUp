@@ -28,20 +28,6 @@ struct HabitEditSheet: View {
                     iconPicker
                 }
 
-                Section("Сложность") {
-                    Picker("Сложность", selection: $viewModel.draftDifficulty) {
-                        ForEach(TaskDifficulty.allCases, id: \.self) { difficulty in
-                            Text(difficulty.title)
-                                .tag(difficulty)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    Text("За выполнение: \(viewModel.draftDifficulty.xpReward) XP")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-
                 Section("Статус") {
                     Toggle(isOn: $viewModel.draftIsDone) {
                         Text("Пометить выполненным")
