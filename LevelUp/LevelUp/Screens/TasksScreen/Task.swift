@@ -53,11 +53,26 @@ enum TaskTag: String, CaseIterable {
 }
 
 struct Task: Identifiable, Equatable {
-    let id: UUID = UUID()
+    let id: UUID
     var title: String
-    var description: String = ""
-    var isCompleted: Bool = false
-    var date: Date = Date()
-    var tag: TaskTag? = nil
-    var difficulty: TaskDifficulty = .medium
+    var description: String
+    var isCompleted: Bool
+    var date: Date
+    var tag: TaskTag?
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        description: String = "",
+        isCompleted: Bool = false,
+        date: Date = Date(),
+        tag: TaskTag? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.isCompleted = isCompleted
+        self.date = date
+        self.tag = tag
+    }
 }

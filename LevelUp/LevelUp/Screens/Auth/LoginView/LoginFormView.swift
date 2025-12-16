@@ -25,12 +25,17 @@ struct LoginFormView: View {
                 text: $viewModel.password,
                 isVisible: $viewModel.showPassword
             )
+            .disabled(viewModel.isLoading)
+            if viewModel.showError, let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
+            }
             
-            FormButton(title: "Войти") {
-                guard viewModel.isFormValid else { return }
-                viewModel.login { result in
-                    switch result {
-                    case .success:
+            FormButton(title: viewModel.isLoading ? "Вход..." : "Войти") {
+                viewModel.login { success in
+                    if success {
                         onSuccess()
                     case .failure(let error):
                         print("Login error:", error.localizedDescription)

@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import FirebaseAuth
+import FirebaseFirestore
 
 final class TodayTasksViewModel: ObservableObject {
     @Published private(set) var allTasks: [Task] = []
@@ -23,12 +25,16 @@ final class TodayTasksViewModel: ObservableObject {
     }
     
     init() {
-        // Временные тестовые данные
-        allTasks = [
-            Task(title:"Walk the dog"),
-            Task(title:"Eat"),
-            Task(title:"Sleep")
-        ]
+        // При наличии авторизованного пользователя пробуем загрузить задачи и прогресс из Firebase
+        _Concurrency.Task {
+            try? await ProgressService.shared.loadCurrentUserProgress()
+            let tasks = try? await TasksService.shared.loadCurrentUserTasks()
+            if let tasks {
+                await MainActor.run {
+                    self.allTasks = tasks
+                }
+            }
+        }
     }
     
     func tasks(for date: Date, completed: Bool) -> [Task] {
@@ -49,11 +55,20 @@ final class TodayTasksViewModel: ObservableObject {
         } else {
             removeXPPoint(for: task.id)
         }
+
+        _Concurrency.Task {
+            try? await ProgressService.shared.saveCurrentUserProgress()
+            try? await TasksService.shared.saveCurrentUserTasks(self.allTasks)
+        }
     }
     
     func addTask(title: String, date: Date, difficulty: TaskDifficulty = .medium) {
         let newTask = Task(title: title, date: date, difficulty: difficulty)
         allTasks.append(newTask)
+
+        _Concurrency.Task {
+            try? await TasksService.shared.saveCurrentUserTasks(self.allTasks)
+        }
     }
     
     func deleteTask(_ task: Task) {
@@ -64,6 +79,11 @@ final class TodayTasksViewModel: ObservableObject {
         }
 
         allTasks.remove(at: index)
+
+        _Concurrency.Task {
+            try? await ProgressService.shared.saveCurrentUserProgress()
+            try? await TasksService.shared.saveCurrentUserTasks(self.allTasks)
+        }
     }
 
     func updateTask(
