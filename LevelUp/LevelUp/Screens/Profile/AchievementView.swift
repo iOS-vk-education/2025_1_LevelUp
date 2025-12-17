@@ -76,10 +76,11 @@ struct AchievementView: View {
                         .multilineTextAlignment(.center)
                 }
 
+                let height: CGFloat = 24
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(.green.opacity(0.15))
-                        .frame(height: 14)
+                        .frame(height: height)
 
                     GeometryReader { geo in
                         let percent = achievement.isCompleted ? 1.0 :
@@ -88,35 +89,32 @@ struct AchievementView: View {
 
                         RoundedRectangle(cornerRadius: 8)
                             .fill(.green)
-                            .frame(width: max(0, width), height: 14)
+                            .frame(width: max(0, width), height: height)
                     }
-                    .frame(height: 14)
+                    .frame(height: height)
 
                     let barText = achievement.isCompleted ?
                         "Выполнено" :
                         "\(achievement.currentScore) / \(achievement.goal)"
                     Text(barText)
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.black)
                 }
 
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(.brown.opacity(0.15))
-                        .strokeBorder(.black, lineWidth: 1)
-                    if achievement.isCompleted {
-                        Text(ruDateFormat(achievement.achievedOn!))
+                    if let date = achievement.achievedOn {
+                        Text(ruDateFormat(date))
                             .hiddenText()
-                            .font(.system(size: 10))
-                            .multilineTextAlignment(.center)
+                            .font(.system(size: 12))
                     } else {
-                        Text("\(achievement.wage)\nxp")
+                        Text("\(achievement.wage) xp")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.primary)
-                            .multilineTextAlignment(.center)
                     }
                 }
-                .frame(height: 30)
+                .frame(height: height)
             }
             .padding(10)
         }
