@@ -42,7 +42,17 @@ final class ProgressService {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let snapshot = try await userProgressRef(uid: uid).getDocument()
-        guard let data = snapshot.data() else { return }
+        let stats = Statistics.shared
+
+        // Если для пользователя ещё нет документа прогресса —
+        // сбрасываем локальный прогресс, чтобы не тянуть данные другого юзера.
+        guard let data = snapshot.data() else {
+            await MainActor.run {
+                stats.extraXpWage = 0
+                stats.xpPoints = []
+            }
+            return
+        }
 
         let extraXpWage = data["extraXpWage"] as? Int ?? 0
         let xpPointsRaw = data["xpPoints"] as? [[String: Any]] ?? []
@@ -63,8 +73,9 @@ final class ProgressService {
             return Point(id: id, date: timestamp.dateValue(), value: value)
         }
 
-        let stats = Statistics.shared
-        stats.extraXpWage = extraXpWage
-        stats.xpPoints = points
+        await MainActor.run {
+            stats.extraXpWage = extraXpWage
+            stats.xpPoints = points
+        }
     }
 }
