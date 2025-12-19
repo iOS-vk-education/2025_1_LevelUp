@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HeaderView: View {
     var body: some View {
-        Text("Сегодня")
+        Text("Задачи")
             .font(.system(size: 32, weight: .bold))
             .frame(maxWidth: .infinity, alignment: .center)
             .foregroundStyle(.primary)
@@ -46,29 +46,66 @@ struct TaskRowView: View {
                     .resizable()
                     .frame(width: 20, height: 20)
             }
-            Text(task.title)
-                .font(.body)
-                .foregroundColor(task.isCompleted ? .secondary : .primary)
-            
-            Spacer()
 
-            if let tag = task.tag {
-                Text(tag.title)
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(tag.color.opacity(0.15))
-                    )
-                    .foregroundStyle(tag.color)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(task.title)
+                    .font(.body)
+                    .foregroundColor(task.isCompleted ? .secondary : .primary)
+
+                HStack(spacing: 8) {
+                    DifficultyBadge(difficulty: task.difficulty)
+                    if let tag = task.tag {
+                        TagBadge(tag: tag)
+                    }
+                }
+                .opacity(task.isCompleted ? 0.6 : 1)
             }
+
+            Spacer()
         }
         .padding(.vertical, 10)
         .contentShape(Rectangle())
         .onTapGesture {
             onEdit()
         }
+    }
+}
+
+private struct TagBadge: View {
+    let tag: TaskTag
+
+    var body: some View {
+        Text(tag.title)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(tag.color.opacity(0.15))
+            )
+            .foregroundStyle(tag.color)
+    }
+}
+
+private struct DifficultyBadge: View {
+    let difficulty: TaskDifficulty
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(difficulty.color)
+                .frame(width: 8, height: 8)
+            Text(difficulty.title)
+            Text("\(difficulty.xpReward) XP")
+        }
+        .font(.caption.weight(.semibold))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            Capsule(style: .continuous)
+                .fill(difficulty.color.opacity(0.12))
+        )
+        .foregroundStyle(difficulty.color)
     }
 }
 
@@ -133,6 +170,8 @@ struct HabitCheckboxRow: View {
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
+                DifficultyBadge(difficulty: habit.difficulty)
+                    .opacity(isDone ? 0.6 : 1)
             }
 
             Spacer()
@@ -151,6 +190,7 @@ struct SwipeActionRow<Content: View>: View {
     @State private var offset: CGFloat = 0
     @State private var isOpen: Bool = false
     @State private var isDragging: Bool = false
+    @State private var isHorizontalDrag: Bool = false
 
     init(
         onDelete: @escaping () -> Void,
@@ -201,9 +241,17 @@ struct SwipeActionRow<Content: View>: View {
                 .gesture(
                     DragGesture()
                         .onChanged { value in
+                            let translation = value.translation
+
+                            if !isHorizontalDrag {
+                                // Определяем направление жеста; вертикальный отдаём ScrollView
+                                isHorizontalDrag = abs(translation.width) > abs(translation.height)
+                            }
+                            guard isHorizontalDrag else { return }
+
                             isDragging = true
 
-                            let t = value.translation.width
+                            let t = translation.width
                             if t < 0 {
                                 offset = max(t, -actionWidth)
                             } else {
@@ -211,6 +259,9 @@ struct SwipeActionRow<Content: View>: View {
                             }
                         }
                         .onEnded { value in
+                            defer { isHorizontalDrag = false }
+                            guard isHorizontalDrag else { return }
+
                             isDragging = false
 
                             let shouldOpen = (-value.translation.width) > actionWidth * 0.4
@@ -289,10 +340,8 @@ struct TodayTasksView: View {
     @State private var isAddingTask: Bool = false
     @FocusState private var isTaskFieldFocused: Bool
     @State private var editingTask: Task? = nil
-    @State private var editingTitle: String = ""
     @State private var isXPInfoPresented: Bool = false
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
-    private let xpPerTask = 100
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -325,8 +374,7 @@ struct TodayTasksView: View {
                                 viewModel.selectedDate = habitsViewModel.selectedDate
                             }
                         )
-                        
-                        // Карточка "Сделать"
+
                         TasksCardView(
                             title: "Сделать",
                             tasks: viewModel.todayTasks,
@@ -346,7 +394,6 @@ struct TodayTasksView: View {
                             }
                         )
                         
-                        // Карточка "Сделано"
                         TasksCardView(
                             title: "Сделано",
                             tasks: viewModel.doneTasks,
@@ -477,20 +524,34 @@ struct TodayTasksView: View {
     }
     
     private func startEdit(_ task: Task) {
-        editingTitle = task.title
         editingTask = task
     }
 
-    private var totalTasksCount: Int {
-        viewModel.todayTasks.count + viewModel.doneTasks.count
+    private var taskEarnedXP: Int {
+        viewModel.doneTasks.reduce(0) { $0 + $1.difficulty.xpReward }
+    }
+
+    private var taskTargetXP: Int {
+        (viewModel.todayTasks + viewModel.doneTasks)
+            .reduce(0) { $0 + $1.difficulty.xpReward }
+    }
+
+    private var habitEarnedXP: Int {
+        habitsForToday
+            .filter { habitsViewModel.isHabitDone($0, on: todayDate) }
+            .reduce(0) { $0 + $1.difficulty.xpReward }
+    }
+
+    private var habitTargetXP: Int {
+        habitsForToday.reduce(0) { $0 + $1.difficulty.xpReward }
     }
 
     private var earnedXP: Int {
-        viewModel.doneTasks.count * xpPerTask
+        taskEarnedXP + habitEarnedXP
     }
 
     private var targetXP: Int {
-        max(totalTasksCount * xpPerTask, xpPerTask)
+        taskTargetXP + habitTargetXP
     }
 
     private var todayXPProgress: Double {
@@ -502,32 +563,4 @@ struct TodayTasksView: View {
     TodayTasksView()
         .environmentObject(HabitViewModel())
         .environmentObject(TodayTasksViewModel())
-}
-
-struct XPInfoView: View {
-    let earnedXP: Int
-
-    var body: some View {
-        ZStack {
-            Color(red: 0.30, green: 0.60, blue: 0.98)
-                .ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                Image("mascott")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 360)
-
-                Text("Копи опыт и получай XP")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.white)
-
-                Text("Текущее XP за сегодня: \(earnedXP)")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.9))
-            }
-            .multilineTextAlignment(.center)
-            .padding(24)
-        }
-    }
 }

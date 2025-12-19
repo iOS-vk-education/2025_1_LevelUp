@@ -14,7 +14,6 @@ final class TasksService {
             .collection("tasks")
     }
 
-    // Загрузить задачи текущего пользователя и вернуть их списком
     func loadCurrentUserTasks() async throws -> [Task] {
         guard let uid = Auth.auth().currentUser?.uid else { return [] }
 
@@ -38,6 +37,14 @@ final class TasksService {
                 tag = TaskTag(rawValue: tagRaw)
             }
 
+            let difficulty: TaskDifficulty
+            if let difficultyRaw = data["difficulty"] as? String,
+               let parsed = TaskDifficulty(rawValue: difficultyRaw) {
+                difficulty = parsed
+            } else {
+                difficulty = .medium
+            }
+
             let id: UUID
             if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
                 id = uuid
@@ -53,26 +60,24 @@ final class TasksService {
                 description: description,
                 isCompleted: isCompleted,
                 date: date,
-                tag: tag
+                tag: tag,
+                difficulty: difficulty
             )
         }
 
         return tasks
     }
 
-    // Полностью перезаписать задачи пользователя в базе текущим списком
     func saveCurrentUserTasks(_ tasks: [Task]) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let collection = tasksCollection(uid: uid)
 
-        // Сначала удаляем все существующие документы
         let existing = try await collection.getDocuments()
         for doc in existing.documents {
             try await collection.document(doc.documentID).delete()
         }
 
-        // Затем записываем текущие задачи
         for task in tasks {
             let data: [String: Any] = [
                 "id": task.id.uuidString,
@@ -80,7 +85,8 @@ final class TasksService {
                 "description": task.description,
                 "isCompleted": task.isCompleted,
                 "date": Timestamp(date: task.date),
-                "tag": task.tag?.rawValue as Any
+                "tag": task.tag?.rawValue as Any,
+                "difficulty": task.difficulty.rawValue
             ]
 
             try await collection.document(task.id.uuidString).setData(data, merge: false)

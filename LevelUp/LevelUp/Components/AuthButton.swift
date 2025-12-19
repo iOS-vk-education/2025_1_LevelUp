@@ -27,10 +27,14 @@ struct AuthButton: View {
         NavigationLink(destination: destination) {
             Text(title)
                 .font(UIConstants.Fonts.button)
-                .foregroundColor(style == .primary ? .white : Color("LoginColorText"))
+                .foregroundColor(style == .primary ? .white : Color(.label))
                 .frame(width: UIConstants.Sizes.buttonWidth, height: UIConstants.Sizes.buttonHeight)
                 .background(backgroundView)
                 .cornerRadius(UIConstants.Sizes.buttonCornerRadius)
+                .shadow(color: style == .secondary ? Color.black.opacity(0.13) : .clear,
+                        radius: style == .secondary ? 8 : 0,
+                        x: 0,
+                        y: style == .secondary ? 6 : 0)
         }
     }
     
@@ -39,8 +43,7 @@ struct AuthButton: View {
         if style == .primary {
             Color("ButColor")
         } else {
-            Rectangle()
-                .fill(.ultraThinMaterial)
+            Color.white.opacity(0.96)
         }
     }
 }
@@ -57,4 +60,3 @@ struct AuthButton: View {
         }
     }
 }
-

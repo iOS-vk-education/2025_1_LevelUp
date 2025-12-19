@@ -51,13 +51,9 @@ final class TodayTasksViewModel: ObservableObject {
         allTasks[index].isCompleted.toggle()
         
         if allTasks[index].isCompleted {
-            let p = Point(date: task.date, value: 100)
-            pointByTask[task.id] = p
-            Statistics.shared.addXPPoint(point: p)
+            addXPPoint(for: allTasks[index])
         } else {
-            if let p = pointByTask.removeValue(forKey: task.id) {
-                Statistics.shared.delXPPoint(point: p)
-            }
+            removeXPPoint(for: task.id)
         }
 
         _Concurrency.Task {
@@ -66,8 +62,8 @@ final class TodayTasksViewModel: ObservableObject {
         }
     }
     
-    func addTask(title: String, date: Date) {
-        let newTask = Task(title: title, date: date)
+    func addTask(title: String, date: Date, difficulty: TaskDifficulty = .medium) {
+        let newTask = Task(title: title, date: date, difficulty: difficulty)
         allTasks.append(newTask)
 
         _Concurrency.Task {
@@ -90,10 +86,45 @@ final class TodayTasksViewModel: ObservableObject {
         }
     }
 
-    func updateTask(_ task: Task, newTitle: String, newDescription: String, newTag: TaskTag?) {
+    func updateTask(
+        _ task: Task,
+        newTitle: String,
+        newDescription: String,
+        newTag: TaskTag?,
+        newDifficulty: TaskDifficulty
+    ) {
         guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
         allTasks[index].title = newTitle
         allTasks[index].description = newDescription
         allTasks[index].tag = newTag
+        allTasks[index].difficulty = newDifficulty
+
+        if allTasks[index].isCompleted {
+            refreshXPPoint(for: allTasks[index], previousPoint: pointByTask[task.id])
+        }
+    }
+
+    private func addXPPoint(for task: Task) {
+        let point = Point(date: task.date, value: task.difficulty.xpReward)
+        pointByTask[task.id] = point
+        Statistics.shared.addXPPoint(point: point)
+    }
+
+    private func removeXPPoint(for taskId: UUID) {
+        guard let point = pointByTask.removeValue(forKey: taskId) else { return }
+        Statistics.shared.delXPPoint(point: point)
+    }
+
+    private func refreshXPPoint(for task: Task, previousPoint: Point?) {
+        if let previousPoint {
+            Statistics.shared.delXPPoint(point: previousPoint)
+        }
+        let updatedPoint = Point(
+            id: previousPoint?.id ?? UUID(),
+            date: task.date,
+            value: task.difficulty.xpReward
+        )
+        pointByTask[task.id] = updatedPoint
+        Statistics.shared.addXPPoint(point: updatedPoint)
     }
 }
