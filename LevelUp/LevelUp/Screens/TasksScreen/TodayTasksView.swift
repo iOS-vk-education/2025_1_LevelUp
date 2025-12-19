@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HeaderView: View {
     var body: some View {
-        Text("Сегодня")
+        Text("Задачи")
             .font(.system(size: 32, weight: .bold))
             .frame(maxWidth: .infinity, alignment: .center)
             .foregroundStyle(.primary)
@@ -190,6 +190,7 @@ struct SwipeActionRow<Content: View>: View {
     @State private var offset: CGFloat = 0
     @State private var isOpen: Bool = false
     @State private var isDragging: Bool = false
+    @State private var isHorizontalDrag: Bool = false
 
     init(
         onDelete: @escaping () -> Void,
@@ -240,9 +241,17 @@ struct SwipeActionRow<Content: View>: View {
                 .gesture(
                     DragGesture()
                         .onChanged { value in
+                            let translation = value.translation
+
+                            if !isHorizontalDrag {
+                                // Определяем направление жеста; вертикальный отдаём ScrollView
+                                isHorizontalDrag = abs(translation.width) > abs(translation.height)
+                            }
+                            guard isHorizontalDrag else { return }
+
                             isDragging = true
 
-                            let t = value.translation.width
+                            let t = translation.width
                             if t < 0 {
                                 offset = max(t, -actionWidth)
                             } else {
@@ -250,6 +259,9 @@ struct SwipeActionRow<Content: View>: View {
                             }
                         }
                         .onEnded { value in
+                            defer { isHorizontalDrag = false }
+                            guard isHorizontalDrag else { return }
+
                             isDragging = false
 
                             let shouldOpen = (-value.translation.width) > actionWidth * 0.4
@@ -362,8 +374,7 @@ struct TodayTasksView: View {
                                 viewModel.selectedDate = habitsViewModel.selectedDate
                             }
                         )
-                        
-                        // Карточка "Сделать"
+
                         TasksCardView(
                             title: "Сделать",
                             tasks: viewModel.todayTasks,
@@ -383,7 +394,6 @@ struct TodayTasksView: View {
                             }
                         )
                         
-                        // Карточка "Сделано"
                         TasksCardView(
                             title: "Сделано",
                             tasks: viewModel.doneTasks,
@@ -553,32 +563,4 @@ struct TodayTasksView: View {
     TodayTasksView()
         .environmentObject(HabitViewModel())
         .environmentObject(TodayTasksViewModel())
-}
-
-struct XPInfoView: View {
-    let earnedXP: Int
-
-    var body: some View {
-        ZStack {
-            Color(red: 0.30, green: 0.60, blue: 0.98)
-                .ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                Image("mascott")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 360)
-
-                Text("Копи опыт и получай XP")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.white)
-
-                Text("Текущее XP за сегодня: \(earnedXP)")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.9))
-            }
-            .multilineTextAlignment(.center)
-            .padding(24)
-        }
-    }
 }

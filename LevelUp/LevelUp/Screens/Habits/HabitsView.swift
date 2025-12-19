@@ -6,6 +6,7 @@ struct HabitsView: View {
     @EnvironmentObject private var tasksViewModel: TodayTasksViewModel
     @FocusState private var isTitleFieldFocused: Bool
     private let habitAccent = Color(red: 0.30, green: 0.60, blue: 0.98)
+    @State private var isXPInfoPresented: Bool = false
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -20,6 +21,10 @@ struct HabitsView: View {
                         earnedXP: earnedXP,
                         targetXP: targetXP
                     )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        isXPInfoPresented = true
+                    }
                     WeekStripView(
                         weekDays: viewModel.weekDays,
                         selectedDate: viewModel.selectedDate,
@@ -57,6 +62,9 @@ struct HabitsView: View {
         }
         .onChange(of: viewModel.selectedDate) { newDate in
             tasksViewModel.selectedDate = newDate
+        }
+        .sheet(isPresented: $isXPInfoPresented) {
+            XPInfoView(earnedXP: earnedXP)
         }
     }
 

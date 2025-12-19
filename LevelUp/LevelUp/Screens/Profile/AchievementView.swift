@@ -59,7 +59,7 @@ struct AchievementView: View {
                 achievement.icon
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 64)
+                    .frame(height: 110)
                     .opacity(achievement.isCompleted ? 1 : 0.4)
                     .padding(.top, 8)
 
@@ -68,55 +68,22 @@ struct AchievementView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
-
-                    Text(achievement.description)
-                        .hiddenText()
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
                 }
 
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.green.opacity(0.15))
-                        .frame(height: 14)
+                let rawProgress = achievement.isCompleted
+                    ? 1.0
+                    : (achievement.goal > 0
+                       ? Double(achievement.currentScore) / Double(achievement.goal)
+                       : 0)
+                let progressText = achievement.isCompleted
+                    ? "Выполнено"
+                    : "\(achievement.currentScore) / \(achievement.goal)"
 
-                    GeometryReader { geo in
-                        let percent = achievement.isCompleted ? 1.0 :
-                        Double(achievement.currentScore) / Double(achievement.goal)
-                        let width: CGFloat = CGFloat(percent) * geo.size.width
-
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(.green)
-                            .frame(width: max(0, width), height: 14)
-                    }
-                    .frame(height: 14)
-
-                    let barText = achievement.isCompleted ?
-                        "Выполнено" :
-                        "\(achievement.currentScore) / \(achievement.goal)"
-                    Text(barText)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.black)
-                }
-
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.brown.opacity(0.15))
-                        .strokeBorder(.black, lineWidth: 1)
-                    if achievement.isCompleted {
-                        Text(ruDateFormat(achievement.achievedOn!))
-                            .hiddenText()
-                            .font(.system(size: 10))
-                            .multilineTextAlignment(.center)
-                    } else {
-                        Text("\(achievement.wage)\nxp")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .frame(height: 30)
+                Brogress.BarView(
+                    progress: rawProgress,
+                    height: 14,
+                    label: progressText
+                )
             }
             .padding(10)
         }

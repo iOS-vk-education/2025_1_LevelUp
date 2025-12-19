@@ -15,7 +15,6 @@ final class ProgressService {
             .document("progress")
     }
 
-    // Сохранить локальный прогресс текущего пользователя в Firestore
     func saveCurrentUserProgress() async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
@@ -37,15 +36,12 @@ final class ProgressService {
         try await userProgressRef(uid: uid).setData(data, merge: true)
     }
 
-    // Загрузить прогресс из Firestore в Statistics.shared
     func loadCurrentUserProgress() async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let snapshot = try await userProgressRef(uid: uid).getDocument()
         let stats = Statistics.shared
 
-        // Если для пользователя ещё нет документа прогресса —
-        // сбрасываем локальный прогресс, чтобы не тянуть данные другого юзера.
         guard let data = snapshot.data() else {
             await MainActor.run {
                 stats.extraXpWage = 0

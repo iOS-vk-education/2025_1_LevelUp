@@ -14,7 +14,6 @@ final class TasksService {
             .collection("tasks")
     }
 
-    // Загрузить задачи текущего пользователя и вернуть их списком
     func loadCurrentUserTasks() async throws -> [Task] {
         guard let uid = Auth.auth().currentUser?.uid else { return [] }
 
@@ -38,7 +37,6 @@ final class TasksService {
                 tag = TaskTag(rawValue: tagRaw)
             }
 
-            // difficulty (easy / medium / hard)
             let difficulty: TaskDifficulty
             if let difficultyRaw = data["difficulty"] as? String,
                let parsed = TaskDifficulty(rawValue: difficultyRaw) {
@@ -70,19 +68,16 @@ final class TasksService {
         return tasks
     }
 
-    // Полностью перезаписать задачи пользователя в базе текущим списком
     func saveCurrentUserTasks(_ tasks: [Task]) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let collection = tasksCollection(uid: uid)
 
-        // Сначала удаляем все существующие документы
         let existing = try await collection.getDocuments()
         for doc in existing.documents {
             try await collection.document(doc.documentID).delete()
         }
 
-        // Затем записываем текущие задачи
         for task in tasks {
             let data: [String: Any] = [
                 "id": task.id.uuidString,

@@ -23,6 +23,7 @@ struct ProfileView: View {
 
     @State private var viewModel = ProfileViewModel()
     @State private var scrollY: CGFloat = 0
+    @State private var selectedAchievement: Achievement?
 
     var body: some View {
         NavigationStack {
@@ -57,6 +58,9 @@ struct ProfileView: View {
                         Image(systemName: "ellipsis.circle")
                     }
                 }
+            }
+            .sheet(item: $selectedAchievement) { achievement in
+                AchievementDetailView(achievement: achievement)
             }
         }
     }
@@ -151,25 +155,26 @@ struct ProfileView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
+// Uncomment if you need to test achievement and XP mechanics
 
-            Button("Добавить 10000 XP") {
-                // Добавляем опыт через extraXpWage, чтобы он сохранялся локально и в Firebase.
-                Statistics.shared.addExtraWage(10_000)
-
-                // Пересчитываем достижения, завязанные на прогрессе.
-                AchievementsStorage.shared.achs.forEach { achievement in
-                    achievement.recalculate()
-                }
-
-                // Сохраняем прогресс текущего пользователя в Firebase.
-                _Concurrency.Task {
-                    try? await ProgressService.shared.saveCurrentUserProgress()
-                }
-            }
-            
+//            Button("Добавить 10000 XP") {
+//                Statistics.shared.addExtraWage(10_000)
+//
+//                AchievementsStorage.shared.achs.forEach { achievement in
+//                    achievement.recalculate()
+//                }
+//
+//                _Concurrency.Task {
+//                    try? await ProgressService.shared.saveCurrentUserProgress()
+//                }
+//            }
+//            
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(AchievementsStorage.shared.achs) { achievement in
                     AchievementView(achievement: achievement)
+                        .onTapGesture {
+                            selectedAchievement = achievement
+                        }
                 }
             }
             .padding(.horizontal, 16)
