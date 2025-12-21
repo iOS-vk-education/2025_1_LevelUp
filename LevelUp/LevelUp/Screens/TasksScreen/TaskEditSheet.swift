@@ -2,21 +2,26 @@ import SwiftUI
 
 struct TaskEditSheet: View {
     let task: Task
-    @ObservedObject var viewModel: TodayTasksViewModel
     @State private var title: String
     @State private var description: String
     @State private var tag: TaskTag?
     @State private var difficulty: TaskDifficulty
     @FocusState private var isTitleFocused: Bool
     @Environment(\.dismiss) private var dismiss
+    
+    private let onFinish: (Task) -> Void
+    private let onCancel: () -> Void
+    
+    @EnvironmentObject var viewModel: TodayTasksViewModel
 
-    init(task: Task, viewModel: TodayTasksViewModel) {
+    init(task: Task, onFinish: @escaping (Task) -> Void, onCancel: @escaping () -> Void = {}) {
         self.task = task
-        self.viewModel = viewModel
         _title = State(initialValue: task.title)
         _description = State(initialValue: task.description)
         _tag = State(initialValue: task.tag)
         _difficulty = State(initialValue: task.difficulty)
+        self.onFinish = onFinish
+        self.onCancel = onCancel
     }
 
     var body: some View {
@@ -55,6 +60,7 @@ struct TaskEditSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") {
+                        onCancel()
                         dismiss()
                     }
                 }
@@ -77,13 +83,10 @@ struct TaskEditSheet: View {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTitle.isEmpty else { return }
-        viewModel.updateTask(
-            task,
-            newTitle: trimmedTitle,
-            newDescription: trimmedDescription,
-            newTag: tag,
-            newDifficulty: difficulty
-        )
+        
+        let selectedDate = viewModel.selectedDate
+        let task = Task(id: task.id, title: trimmedTitle, description: trimmedDescription, date: selectedDate, tag: tag, difficulty: difficulty)
+        onFinish(task)
         dismiss()
     }
 

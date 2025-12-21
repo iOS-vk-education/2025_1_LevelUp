@@ -16,8 +16,8 @@ struct LiquidGlassCircleButton: View {
         buttonSize: CGFloat,
         iconSize: CGFloat,
         useMaterial: Bool = true,
+        imageShadow: CGFloat = 0.25,
         action: @escaping () -> Void,
-        imageShadow: CGFloat = 0.25
     ) {
         self.systemImage = systemImage
         self.tint = tint

@@ -62,9 +62,19 @@ final class TodayTasksViewModel: ObservableObject {
         }
     }
     
-    func addTask(title: String, date: Date, difficulty: TaskDifficulty = .medium) {
+    func addTask(title: String, date: Date, difficulty: TaskDifficulty = .medium) -> Task {
         let newTask = Task(title: title, date: date, difficulty: difficulty)
         allTasks.append(newTask)
+
+        _Concurrency.Task {
+            try? await TasksService.shared.saveCurrentUserTasks(self.allTasks)
+        }
+        
+        return newTask
+    }
+    
+    func addTask(_ task: Task) {
+        allTasks.append(task)
 
         _Concurrency.Task {
             try? await TasksService.shared.saveCurrentUserTasks(self.allTasks)
@@ -99,9 +109,13 @@ final class TodayTasksViewModel: ObservableObject {
         allTasks[index].tag = newTag
         allTasks[index].difficulty = newDifficulty
 
-        if allTasks[index].isCompleted {
-            refreshXPPoint(for: allTasks[index], previousPoint: pointByTask[task.id])
-        }
+        refreshXPPoint(for: allTasks[index], previousPoint: pointByTask[task.id])
+    }
+    
+    func updateTask(_ task: Task) {
+        guard let index = allTasks.firstIndex(where: { $0.id == task.id }) else { return }
+        allTasks[index] = task
+        refreshXPPoint(for: allTasks[index], previousPoint: pointByTask[task.id])
     }
 
     private func addXPPoint(for task: Task) {

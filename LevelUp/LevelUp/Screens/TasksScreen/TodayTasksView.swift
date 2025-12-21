@@ -215,8 +215,8 @@ struct SwipeActionRow<Content: View>: View {
                         buttonSize: 40,
                         iconSize: 18,
                         useMaterial: false,
+                        imageShadow: 0,
                         action: onDelete,
-                        imageShadow: 0
                     )
                     LiquidGlassCircleButton(
                         systemImage: "pencil",
@@ -224,8 +224,8 @@ struct SwipeActionRow<Content: View>: View {
                         buttonSize: 40,
                         iconSize: 18,
                         useMaterial: false,
+                        imageShadow: 0,
                         action: onEdit,
-                        imageShadow: 0
                     )
                 }
                 .padding(.trailing, 6)
@@ -328,6 +328,7 @@ struct TodayTasksView: View {
     @State private var isAddingTask: Bool = false
     @FocusState private var isTaskFieldFocused: Bool
     @State private var editingTask: Task? = nil
+    @State private var addingTask: Bool = false
     @State private var isXPInfoPresented: Bool = false
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
     
@@ -423,12 +424,20 @@ struct TodayTasksView: View {
                 .onAppear {
                     viewModel.selectedDate = habitsViewModel.selectedDate
                 }
-                .onChange(of: habitsViewModel.selectedDate) { newDate in
+                .onChange(of: habitsViewModel.selectedDate) { _, newDate in
                     viewModel.selectedDate = newDate
                 }
             }
+            .sheet(isPresented: $addingTask) {
+                let newTask = Task(title: "")
+                TaskEditSheet(task: newTask) { edited in
+                    viewModel.addTask(edited)
+                }
+            }
             .sheet(item: $editingTask) { task in
-                TaskEditSheet(task: task, viewModel: viewModel)
+                TaskEditSheet(task: task) { edited in
+                    viewModel.updateTask(edited)
+                }
             }
             .sheet(isPresented: $isXPInfoPresented) {
                 XPInfoView(earnedXP: earnedXP)
@@ -438,10 +447,7 @@ struct TodayTasksView: View {
             if !isAddingTask {
                 LiquidGlassCircleButton(systemImage: "plus", tint: myBlue, buttonSize: 72, iconSize: 26, imageShadow: 0.25) {
                     withAnimation {
-                        isAddingTask = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        isTaskFieldFocused = true
+                        addingTask = true
                     }
                 }
                 .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
@@ -450,53 +456,13 @@ struct TodayTasksView: View {
                 .padding(.bottom, 40)
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            if isAddingTask {
-                HStack(spacing: 12) {
-                    TextField("Какие у тебя планы?", text: $newTaskTitle)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(Color(myBlue).opacity(0.2), lineWidth: 1)
-                        )
-                        .font(.system(size: 16))
-                        .submitLabel(.done)
-                        .focused($isTaskFieldFocused)
-                        .onSubmit(addTask)
-                    
-                    LiquidGlassCircleButton(
-                            systemImage: "arrow.up",
-                            tint: myBlue,
-                            buttonSize: 36,
-                            iconSize: 20,
-                            imageShadow: 0.25
-                    ) {
-                        addTask()
-                    }
-                    
-                    
-                }
-                .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
-                .shadow(color: Color.white.opacity(0.4), radius: 8, x: 0, y: -3)
-                .padding(.horizontal, 16)
-                .padding(.top, 4)
-                .padding(.bottom, 8)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
     }
 
     private func addTask() {
         let trimmed = newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        viewModel.addTask(title: trimmed, date: todayDate)
+        let _ = viewModel.addTask(title: trimmed, date: todayDate)
         newTaskTitle = ""
 
         withAnimation {
