@@ -355,12 +355,13 @@ struct TodayTasksView: View {
                             weekDays: habitsViewModel.weekDays,
                             selectedDate: habitsViewModel.selectedDate,
                             onSelectDay: { date in
-                                habitsViewModel.selectDate(date)
-                                viewModel.selectedDate = habitsViewModel.selectedDate
+                                withAnimation {
+                                    habitsViewModel.selectDate(date)
+                                    viewModel.selectedDate = habitsViewModel.selectedDate
+                                }
                             },
                             onShiftWeek: { offset in
                                 habitsViewModel.shiftWeek(by: offset)
-                                viewModel.selectedDate = habitsViewModel.selectedDate
                             }
                         )
                         
@@ -370,7 +371,7 @@ struct TodayTasksView: View {
                             tasks: viewModel.todayTasks,
                             emptyText: "Нет задач",
                             toggleTask: { task in
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation {
                                     viewModel.toggleCompletion(for: task)
                                 }
                             },
@@ -408,7 +409,7 @@ struct TodayTasksView: View {
                             habits: habitsForToday,
                             isDone: { habitsViewModel.isHabitDone($0, on: todayDate) },
                             toggle: { habit in
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation {
                                     habitsViewModel.toggleHabit(habit, on: todayDate)
                                 }
                             }
