@@ -28,16 +28,11 @@ struct HabitEditSheet: View {
                     iconPicker
                 }
 
-                Section("Сложность") {
-                    Picker("Сложность", selection: $viewModel.draftDifficulty) {
-                        ForEach(TaskDifficulty.allCases, id: \.self) { difficulty in
-                            Text(difficulty.title)
-                                .tag(difficulty)
-                        }
-                    }
-                    .pickerStyle(.segmented)
+                Section("Время (мин)") {
+                    TextField("Например, 15", value: $viewModel.draftMinutes, format: .number)
+                        .keyboardType(.numberPad)
 
-                    Text("За выполнение: \(viewModel.draftDifficulty.xpReward) XP")
+                    Text("1 минута = 1 XP")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

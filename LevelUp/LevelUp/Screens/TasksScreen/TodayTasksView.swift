@@ -53,7 +53,9 @@ struct TaskRowView: View {
                     .foregroundColor(task.isCompleted ? .secondary : .primary)
 
                 HStack(spacing: 8) {
-                    DifficultyBadge(difficulty: task.difficulty)
+                    if task.minutesSpent > 0 {
+                        MinutesBadge(minutes: task.minutesSpent)
+                    }
                     if let tag = task.tag {
                         TagBadge(tag: tag)
                     }
@@ -87,25 +89,25 @@ private struct TagBadge: View {
     }
 }
 
-private struct DifficultyBadge: View {
-    let difficulty: TaskDifficulty
+private struct MinutesBadge: View {
+    let minutes: Int
 
     var body: some View {
         HStack(spacing: 6) {
             Circle()
-                .fill(difficulty.color)
+                .fill(Color.blue)
                 .frame(width: 8, height: 8)
-            Text(difficulty.title)
-            Text("\(difficulty.xpReward) XP")
+            Text("\(minutes) мин")
+            Text("\(minutes) XP")
         }
         .font(.caption.weight(.semibold))
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(
             Capsule(style: .continuous)
-                .fill(difficulty.color.opacity(0.12))
+                .fill(Color.blue.opacity(0.12))
         )
-        .foregroundStyle(difficulty.color)
+        .foregroundStyle(Color.blue)
     }
 }
 
@@ -170,7 +172,7 @@ struct HabitCheckboxRow: View {
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
-                DifficultyBadge(difficulty: habit.difficulty)
+                MinutesBadge(minutes: habit.minutesSpent)
                     .opacity(isDone ? 0.6 : 1)
             }
 
@@ -328,9 +330,9 @@ struct TodayTasksView: View {
     @State private var isAddingTask: Bool = false
     @FocusState private var isTaskFieldFocused: Bool
     @State private var editingTask: Task? = nil
-    @State private var addingTask: Bool = false
     @State private var isXPInfoPresented: Bool = false
     let myBlue = Color(red: 0.30, green: 0.60, blue: 0.98)
+    private let xpProgressTarget = 100
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -429,15 +431,25 @@ struct TodayTasksView: View {
                     viewModel.selectedDate = newDate
                 }
             }
-            .sheet(isPresented: $addingTask) {
+            .sheet(isPresented: $isAddingTask) {
                 let newTask = Task(title: "")
                 TaskEditSheet(task: newTask) { edited in
-                    viewModel.addTask(edited)
+                    viewModel.addTask(
+                        title: edited.title,
+                        date: todayDate,
+                        minutesSpent: edited.minutesSpent
+                    )
                 }
             }
             .sheet(item: $editingTask) { task in
                 TaskEditSheet(task: task) { edited in
-                    viewModel.updateTask(edited)
+                    viewModel.updateTask(
+                        task,
+                        newTitle: edited.title,
+                        newDescription: edited.description,
+                        newTag: edited.tag,
+                        newMinutes: edited.minutesSpent
+                    )
                 }
             }
             .sheet(isPresented: $isXPInfoPresented) {
@@ -448,7 +460,7 @@ struct TodayTasksView: View {
             if !isAddingTask {
                 LiquidGlassCircleButton(systemImage: "plus", tint: myBlue, buttonSize: 72, iconSize: 26, imageShadow: 0.25) {
                     withAnimation {
-                        addingTask = true
+                        isAddingTask = true
                     }
                 }
                 .shadow(color: Color.black.opacity(0.2), radius: 18, x: 0, y: 10)
@@ -463,7 +475,7 @@ struct TodayTasksView: View {
         let trimmed = newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        let _ = viewModel.addTask(title: trimmed, date: todayDate)
+        _ = viewModel.addTask(title: trimmed, date: todayDate)
         newTaskTitle = ""
 
         withAnimation {
@@ -485,22 +497,13 @@ struct TodayTasksView: View {
     }
 
     private var taskEarnedXP: Int {
-        viewModel.doneTasks.reduce(0) { $0 + $1.difficulty.xpReward }
-    }
-
-    private var taskTargetXP: Int {
-        (viewModel.todayTasks + viewModel.doneTasks)
-            .reduce(0) { $0 + $1.difficulty.xpReward }
+        viewModel.doneTasks.reduce(0) { $0 + max($1.minutesSpent, 0) }
     }
 
     private var habitEarnedXP: Int {
         habitsForToday
             .filter { habitsViewModel.isHabitDone($0, on: todayDate) }
-            .reduce(0) { $0 + $1.difficulty.xpReward }
-    }
-
-    private var habitTargetXP: Int {
-        habitsForToday.reduce(0) { $0 + $1.difficulty.xpReward }
+            .reduce(0) { $0 + max($1.minutesSpent, 0) }
     }
 
     private var earnedXP: Int {
@@ -508,7 +511,7 @@ struct TodayTasksView: View {
     }
 
     private var targetXP: Int {
-        taskTargetXP + habitTargetXP
+        xpProgressTarget
     }
 
     private var todayXPProgress: Double {

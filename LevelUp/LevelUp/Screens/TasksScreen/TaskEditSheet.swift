@@ -5,7 +5,7 @@ struct TaskEditSheet: View {
     @State private var title: String
     @State private var description: String
     @State private var tag: TaskTag?
-    @State private var difficulty: TaskDifficulty
+    @State private var minutesSpent: Int
     @FocusState private var isTitleFocused: Bool
     @Environment(\.dismiss) private var dismiss
     
@@ -19,7 +19,7 @@ struct TaskEditSheet: View {
         _title = State(initialValue: task.title)
         _description = State(initialValue: task.description)
         _tag = State(initialValue: task.tag)
-        _difficulty = State(initialValue: task.difficulty)
+        _minutesSpent = State(initialValue: max(task.minutesSpent, 0))
         self.onFinish = onFinish
         self.onCancel = onCancel
     }
@@ -41,16 +41,11 @@ struct TaskEditSheet: View {
                     tagPicker
                 }
 
-                Section("Сложность") {
-                    Picker("Сложность", selection: $difficulty) {
-                        ForEach(TaskDifficulty.allCases, id: \.self) { difficulty in
-                            Text(difficulty.title)
-                                .tag(difficulty)
-                        }
-                    }
-                    .pickerStyle(.segmented)
+                Section("Затраченное время (мин)") {
+                    TextField("Например, 25", value: $minutesSpent, format: .number)
+                        .keyboardType(.numberPad)
 
-                    Text("За выполнение: \(difficulty.xpReward) XP")
+                    Text("1 минута = 1 XP")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -85,7 +80,15 @@ struct TaskEditSheet: View {
         guard !trimmedTitle.isEmpty else { return }
         
         let selectedDate = viewModel.selectedDate
-        let task = Task(id: task.id, title: trimmedTitle, description: trimmedDescription, date: selectedDate, tag: tag, difficulty: difficulty)
+        let task = Task(
+            id: task.id,
+            title: trimmedTitle,
+            description: trimmedDescription,
+            isCompleted: task.isCompleted,
+            date: selectedDate,
+            tag: tag,
+            minutesSpent: max(minutesSpent, 0)
+        )
         onFinish(task)
         dismiss()
     }

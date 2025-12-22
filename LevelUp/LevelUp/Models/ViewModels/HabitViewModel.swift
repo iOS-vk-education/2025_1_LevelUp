@@ -19,7 +19,7 @@ final class HabitViewModel: ObservableObject {
     @Published var draftIsDone: Bool = false
     @Published var draftIconName: String = ""
     @Published var draftRepeatDays: Set<Int>
-    @Published var draftDifficulty: TaskDifficulty = .medium
+    @Published var draftMinutes: Int = 0
     @Published var isCreatingNew: Bool = false
     @Published var showDeleteOptions: Bool = false
 
@@ -64,7 +64,7 @@ final class HabitViewModel: ObservableObject {
             repeatDays: [weekday],
             iconName: icon,
             tint: tint,
-            difficulty: .medium
+            minutesSpent: 0
         )
 
         editingHabit = newHabit
@@ -73,7 +73,7 @@ final class HabitViewModel: ObservableObject {
         draftIsDone = false
         draftIconName = icon
         draftRepeatDays = [weekday]
-        draftDifficulty = .medium
+        draftMinutes = 0
         isCreatingNew = true
         showDeleteOptions = false
     }
@@ -85,7 +85,7 @@ final class HabitViewModel: ObservableObject {
         draftIsDone = isHabitDone(habit, on: selectedDay)
         draftIconName = habit.iconName
         draftRepeatDays = habit.repeatDays
-        draftDifficulty = habit.difficulty
+        draftMinutes = habit.minutesSpent
         isCreatingNew = false
         showDeleteOptions = false
     }
@@ -98,7 +98,7 @@ final class HabitViewModel: ObservableObject {
         let trimmedDescription = draftDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         let chosenIcon = draftIconName.isEmpty ? currentHabit.iconName : draftIconName
         let repeatDays = draftRepeatDays.isEmpty ? currentHabit.repeatDays : draftRepeatDays
-        let chosenDifficulty = draftDifficulty
+        let chosenMinutes = max(draftMinutes, 0)
 
         let updatedHabit = Habit(
             id: currentHabit.id,
@@ -111,7 +111,7 @@ final class HabitViewModel: ObservableObject {
             endDate: currentHabit.endDate,
             iconName: chosenIcon,
             tint: currentHabit.tint,
-            difficulty: chosenDifficulty
+            minutesSpent: chosenMinutes
         )
 
         withAnimation(.easeInOut) {
@@ -123,7 +123,7 @@ final class HabitViewModel: ObservableObject {
         }
 
         setHabit(updatedHabit, done: draftIsDone, on: selectedDay)
-        if updatedHabit.difficulty != currentHabit.difficulty {
+        if updatedHabit.minutesSpent != currentHabit.minutesSpent {
             refreshXPPoints(for: updatedHabit)
         }
         refreshWeek(for: selectedDay)
@@ -252,7 +252,9 @@ final class HabitViewModel: ObservableObject {
     }
 
     private func addXPPoint(for habit: Habit, on date: Date, completionKey: HabitCompletionKey) {
-        let point = Point(date: date, value: habit.difficulty.xpReward)
+        let value = max(habit.minutesSpent, 0)
+        guard value > 0 else { return }
+        let point = Point(date: date, value: value)
         xpPointsByCompletion[completionKey] = point
         Statistics.shared.addXPPoint(point: point)
     }
@@ -266,7 +268,10 @@ final class HabitViewModel: ObservableObject {
         if let previous = xpPointsByCompletion[completionKey] {
             Statistics.shared.delXPPoint(point: previous)
         }
-        let updatedPoint = Point(date: date, value: habit.difficulty.xpReward)
+        xpPointsByCompletion.removeValue(forKey: completionKey)
+        let value = max(habit.minutesSpent, 0)
+        guard value > 0 else { return }
+        let updatedPoint = Point(date: date, value: value)
         xpPointsByCompletion[completionKey] = updatedPoint
         Statistics.shared.addXPPoint(point: updatedPoint)
     }
