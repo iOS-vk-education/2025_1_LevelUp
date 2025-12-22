@@ -1,35 +1,5 @@
 import SwiftUI
 
-enum TaskDifficulty: String, CaseIterable {
-    case easy
-    case medium
-    case hard
-
-    var title: String {
-        switch self {
-        case .easy: return "Easy"
-        case .medium: return "Medium"
-        case .hard: return "Hard"
-        }
-    }
-
-    var xpReward: Int {
-        switch self {
-        case .easy: return 50
-        case .medium: return 100
-        case .hard: return 200
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .easy: return .green
-        case .medium: return .blue
-        case .hard: return .purple
-        }
-    }
-}
-
 enum TaskTag: String, CaseIterable {
     case primary
     case secondary
@@ -59,7 +29,7 @@ struct Task: Identifiable, Equatable {
     var isCompleted: Bool
     var date: Date
     var tag: TaskTag?
-    var difficulty: TaskDifficulty
+    var minutesSpent: Int
 
     init(
         id: UUID = UUID(),
@@ -68,7 +38,7 @@ struct Task: Identifiable, Equatable {
         isCompleted: Bool = false,
         date: Date = Date(),
         tag: TaskTag? = nil,
-        difficulty: TaskDifficulty = .medium
+        minutesSpent: Int = 0
     ) {
         self.id = id
         self.title = title
@@ -76,6 +46,6 @@ struct Task: Identifiable, Equatable {
         self.isCompleted = isCompleted
         self.date = date
         self.tag = tag
-        self.difficulty = difficulty
+        self.minutesSpent = minutesSpent
     }
 }

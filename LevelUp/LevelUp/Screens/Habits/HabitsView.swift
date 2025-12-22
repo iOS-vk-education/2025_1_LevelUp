@@ -6,6 +6,7 @@ struct HabitsView: View {
     @EnvironmentObject private var tasksViewModel: TodayTasksViewModel
     @FocusState private var isTitleFieldFocused: Bool
     private let habitAccent = Color(red: 0.30, green: 0.60, blue: 0.98)
+    private let xpProgressTarget = 100
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -113,22 +114,13 @@ struct HabitsView: View {
     }
 
     private var taskEarnedXP: Int {
-        tasksViewModel.doneTasks.reduce(0) { $0 + $1.difficulty.xpReward }
-    }
-
-    private var taskTargetXP: Int {
-        (tasksViewModel.todayTasks + tasksViewModel.doneTasks)
-            .reduce(0) { $0 + $1.difficulty.xpReward }
+        tasksViewModel.doneTasks.reduce(0) { $0 + max($1.minutesSpent, 0) }
     }
 
     private var habitEarnedXP: Int {
         habitsForSelectedDay
             .filter { viewModel.isHabitDone($0, on: viewModel.selectedDate) }
-            .reduce(0) { $0 + $1.difficulty.xpReward }
-    }
-
-    private var habitTargetXP: Int {
-        habitsForSelectedDay.reduce(0) { $0 + $1.difficulty.xpReward }
+            .reduce(0) { $0 + max($1.minutesSpent, 0) }
     }
 
     private var earnedXP: Int {
@@ -136,7 +128,7 @@ struct HabitsView: View {
     }
 
     private var targetXP: Int {
-        taskTargetXP + habitTargetXP
+        xpProgressTarget
     }
 
     private var todayXPProgress: Double {
